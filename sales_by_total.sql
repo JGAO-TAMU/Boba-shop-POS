@@ -1,3 +1,5 @@
+-- divide order count into price ranges
+
 SELECT 
     CASE 
         WHEN price < 5 THEN 'Under $5'

@@ -1,3 +1,4 @@
+-- list employees by orders processed and total sales
 SELECT 
     e.name,
     COUNT(*) as orders_processed,

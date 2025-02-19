@@ -1,3 +1,4 @@
+-- shows popular combos of modifications
 SELECT 
     m1.name as mod1,
     m2.name as mod2,

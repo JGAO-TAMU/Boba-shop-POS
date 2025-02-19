@@ -1,3 +1,4 @@
+-- rank drinks by popularity
 SELECT 
     m.name as drink_name,
     COUNT(*) as times_ordered

@@ -1,3 +1,4 @@
+-- shows daily revenue trent over time
 SELECT 
     DATE_TRUNC('day', "timestamp") as date,
     SUM(price) as daily_revenue

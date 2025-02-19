@@ -1,3 +1,4 @@
+-- rank ingredients by usage
 SELECT 
     i.name as ingredient,
     SUM(di.quantityUsed) as total_usage

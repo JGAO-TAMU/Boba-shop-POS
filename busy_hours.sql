@@ -1,3 +1,4 @@
+-- show busiest hours 
 SELECT 
     EXTRACT(HOUR FROM "timestamp") as hour,
     COUNT(*) as order_count

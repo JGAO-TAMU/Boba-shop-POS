@@ -1,3 +1,4 @@
+--shows revenue from modifications
 SELECT 
     mm.name,
     COUNT(*) * mm.price as total_revenue

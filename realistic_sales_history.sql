@@ -1,6 +1,7 @@
 -- FROM TERMINAL:
 -- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -v hour=xx -f [path to realistic sales]
 
+--show order count and total revenue by hour
 \if :{?hour}
 \else
 \set hour 12  -- Default to noon if not specified
