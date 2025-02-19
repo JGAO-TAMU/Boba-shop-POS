@@ -1,4 +1,4 @@
--- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -f [path to script]
+--SPECIAL QUERY #3
 -- shows top 10 days by revenue
 SELECT 
     DATE_TRUNC('day', "timestamp") as sale_date,

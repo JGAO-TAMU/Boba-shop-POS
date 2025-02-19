@@ -1,10 +1,9 @@
--- TO USE:
+--SPECIAL QUERY #1
+
+-- custom params:
 -- \set year xxxx
 -- \set week x
 -- \i weekly_sales_history.sql
-
--- FROM TERMINAL:
--- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -v year=2024 -v week=50 -f [path to weekly sales]
 
 -- shows total sales for specified week
 --default values

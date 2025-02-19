@@ -1,4 +1,4 @@
--- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -f [path to script]
+--SPECIAL QUERY #4
 -- shows number of ingredients for each menu item
 SELECT 
     m.name as menu_item,

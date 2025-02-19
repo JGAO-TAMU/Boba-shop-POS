@@ -1,6 +1,4 @@
--- FROM TERMINAL:
--- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -v hour=xx -f [path to realistic sales]
-
+--SPECIAL QUERY #2
 --show order count and total revenue by hour
 \if :{?hour}
 \else

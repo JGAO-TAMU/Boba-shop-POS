@@ -1,8 +1,3 @@
--- TO USE:
--- \i popular_modifications.sql
-
--- FROM TERMINAL:
--- psql -h csce-315-db.engr.tamu.edu -U team_10 -d team_10_db -f /.../popular_modifications.sql
 -- shows popular modification choices
 SELECT 
     mm.name as modification,
