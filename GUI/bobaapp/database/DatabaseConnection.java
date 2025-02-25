@@ -1,13 +1,13 @@
-package bobaapp.database;
+package GUI.bobaapp.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String DATABASE_NAME = "team_10_db";
-    private static final String DATABASE_USER = "team_10";
-    private static final String DATABASE_PASSWORD = "blastoise33";
+    private static final String DATABASE_NAME = "";
+    private static final String DATABASE_USER = "";
+    private static final String DATABASE_PASSWORD = "";
     private static final String DATABASE_URL = 
         "jdbc:postgresql://csce-315-db.engr.tamu.edu/" + DATABASE_NAME;
 
