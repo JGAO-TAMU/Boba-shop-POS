@@ -1,6 +1,6 @@
-package GUI.bobaapp.controllers;
+package bobaapp.controllers;
 
-import GUI.bobaapp.views.MainFrame;
+import bobaapp.views.MainFrame;
 
 import javax.swing.*;
 
