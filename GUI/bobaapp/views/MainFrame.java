@@ -52,6 +52,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(new MenuPanel(), "Menu");
         mainPanel.add(new OrderHistoryPanel(), "OrderHistory");
         mainPanel.add(new CheckoutPanel(), "Checkout");
+        mainPanel.add(new ModificationsPanel(), "Modifications"); // Add the new panel
 
         add(mainPanel, BorderLayout.CENTER);
 

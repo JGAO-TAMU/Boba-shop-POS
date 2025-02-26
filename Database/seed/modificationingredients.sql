@@ -29,3 +29,23 @@ VALUES (7, 20, 1);
 -- for peach bits (modmenuid = 9)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (8, 16, 1);
+
+-- for normal sugar (modmenuid = 10)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (9, 21, 4);
+
+-- for 75% sugar (modmenuid = 11)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (10, 21, 3);
+
+-- for 50% sugar (modmenuid = 11)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (11, 21, 2);
+
+-- for extra ice (modmenuid = 12)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (12, 20, 1);
+
+-- for less ice (modmenuid = 13)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (13, 20, 1);

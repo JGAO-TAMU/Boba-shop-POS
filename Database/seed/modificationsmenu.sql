@@ -6,4 +6,9 @@ INSERT INTO ModificationsMenu (name, price) VALUES
 ('Mango Bits', 0.50),
 ('Strawberry Bits', 0.50),
 ('Ice', 0.00),
-('Peach Bits', 0.50);
+('Peach Bits', 0.50),
+('Sugar', 0.00),
+('75% Sugar', 0.00),
+('50% Sugar', 0.00),
+('Extra Ice', 0.00),
+('Less Ice', 0.00);

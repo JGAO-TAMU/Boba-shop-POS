@@ -2,7 +2,6 @@
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (1, 4, 1),  -- black tea bag
 (1, 7, 1),  -- milk powder
-(1, 21, 1), -- sugar
 (1, 1, 1),  -- cup
 (1, 2, 1),  -- straw
 (1, 3, 1);  -- sealing film
@@ -11,7 +10,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (2, 8, 1),  -- taro powder
 (2, 7, 1),  -- milk powder
-(2, 21, 1), -- sugar
 (2, 1, 1),  -- cup
 (2, 2, 1),  -- straw
 (2, 3, 1);  -- sealing film
@@ -20,7 +18,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (3, 4, 1),  -- black tea bag
 (3, 7, 1),  -- milk powder
-(3, 21, 1), -- sugar
 (3, 1, 1),  -- cup
 (3, 2, 1),  -- straw
 (3, 3, 1);  -- sealing film
@@ -29,7 +26,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (4, 12, 1), -- fruit syrup
 (4, 7, 1),  -- milk powder
-(4, 21, 1), -- sugar
 (4, 1, 1),  -- cup
 (4, 2, 1),  -- straw
 (4, 3, 1);  -- sealing film
@@ -38,7 +34,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (5, 9, 1),  -- matcha powder
 (5, 7, 1),  -- milk powder
-(5, 21, 1), -- sugar
 (5, 1, 1),  -- cup
 (5, 2, 1),  -- straw
 (5, 3, 1);  -- sealing film
@@ -55,7 +50,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (7, 11, 1), -- wintermelon syrup
 (7, 7, 1),  -- milk powder
-(7, 21, 1), -- sugar
 (7, 1, 1),  -- cup
 (7, 2, 1),  -- straw
 (7, 3, 1);  -- sealing film
@@ -64,7 +58,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (8, 6, 1),  -- oolong tea bag
 (8, 7, 1),  -- milk powder
-(8, 21, 1), -- sugar
 (8, 1, 1),  -- cup
 (8, 2, 1),  -- straw
 (8, 3, 1);  -- sealing film
@@ -73,7 +66,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (9, 5, 1),  -- green tea bag
 (9, 7, 1),  -- milk powder
-(9, 21, 1), -- sugar
 (9, 1, 1),  -- cup
 (9, 2, 1),  -- straw
 (9, 3, 1);  -- sealing film
@@ -82,7 +74,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (10, 4, 1),  -- black tea bag (used for earl grey)
 (10, 7, 1),  -- milk powder
-(10, 21, 1), -- sugar
 (10, 1, 1),  -- cup
 (10, 2, 1),  -- straw
 (10, 3, 1);  -- sealing film
@@ -139,7 +130,6 @@ insert into drinkingredients (menuid, ingredientid, quantityused) values
 -- lemon black tea (menuid = 17)
 insert into drinkingredients (menuid, ingredientid, quantityused) values 
 (17, 4, 1),  -- black tea bag
-(17, 21, 1), -- sugar (or, if available, a lemon syrup ingredient)
 (17, 1, 1),  -- cup
 (17, 2, 1),  -- straw
 (17, 3, 1);  -- sealing film
