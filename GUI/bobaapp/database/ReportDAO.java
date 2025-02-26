@@ -72,6 +72,32 @@ public class ReportDAO {
         return revenueTrend;
     }
 
+    public static Map<String, Double> getRevenueTrendByTimeFrame(int days) {
+        Map<String, Double> revenueTrend = new HashMap<>();
+        String query = 
+            "SELECT DATE_TRUNC('day', timestamp) as date, SUM(price) as daily_revenue " +
+            "FROM Orders " +
+            "WHERE timestamp >= CURRENT_DATE - INTERVAL '" + days + " days' " +
+            "GROUP BY date " +
+            "ORDER BY date;";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                String date = rs.getString("date");
+                double totalRevenue = rs.getDouble("daily_revenue");
+
+                revenueTrend.put(date, totalRevenue);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return revenueTrend;
+    }
+
     public static Map<String, Integer> getIngredientUsage() {
         Map<String, Integer> ingredientUsage = new HashMap<>();
         String query = 
