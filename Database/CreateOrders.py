@@ -47,6 +47,7 @@ MAX_INGREDIENT_ID = 35
 def random_inventory_id():
     return random.randint(1, MAX_INGREDIENT_ID)
 
+# field names for orders, drinks, and modifications tables
 orders_rows = [["orderID", "timestamp", "price", "employeeID"]]
 drinks_rows = [["drinkID", "name","orderID"]]
 modifications_rows = [["modID", "drinkID", "modmenuID"]]
@@ -58,6 +59,7 @@ total_sales_so_far = 0.0
 
 current_date = start_date
 while total_sales_so_far < TARGET_SALES or current_date <= end_date:
+    # need 2 peak days for record total orders (game days)
     is_peak = (current_date.date() in peak_days)
     daily_orders = BASE_DAILY_ORDERS
     if is_peak:
@@ -71,6 +73,7 @@ while total_sales_so_far < TARGET_SALES or current_date <= end_date:
         )
         timestamp = datetime.datetime.combine(current_date.date(), random_time)
 
+        # new record in orders
         orders_rows.append([
             order_id_counter,
             timestamp.strftime('%Y-%m-%d %H:%M:%S'),
@@ -84,23 +87,23 @@ while total_sales_so_far < TARGET_SALES or current_date <= end_date:
 
         num_drinks = random.randint(1, 5)
         for _d in range(num_drinks):
-            drink_idx, (drink_name, base_cost) = random.choice(list(enumerate(menu_items)))
+            drink_idx, (drink_name, base_cost) = random.choice(list(enumerate(menu_items))) # random drinks based on menuid in menuitems
             drink_idx+=1
             cost = base_cost
             total_cost = base_cost
-            
+        
             current_drink = [
                 drink_id_counter,
                 current_order_id,
                 drink_idx
             ]
-            drinks_rows.append(current_drink)
+            drinks_rows.append(current_drink) # new record in drinks
 
             current_drink_id = drink_id_counter
             drink_id_counter += 1
 
             if random.random() < MOD_PROBABILITY:
-                mod_idx, (mod_name, mod_extra_cost) = random.choice(list(enumerate(possible_mods)))
+                mod_idx, (mod_name, mod_extra_cost) = random.choice(list(enumerate(possible_mods))) # random mods based on available mods
                 mod_idx+=1
                 mod_cost = mod_extra_cost
                 total_cost += mod_extra_cost
@@ -111,7 +114,7 @@ while total_sales_so_far < TARGET_SALES or current_date <= end_date:
                     current_drink_id,
                     mod_idx,
                 ]
-                modifications_rows.append(current_mod)
+                modifications_rows.append(current_mod) # new record in modifications
 
             order_total += total_cost
 
@@ -120,6 +123,7 @@ while total_sales_so_far < TARGET_SALES or current_date <= end_date:
 
     current_date += datetime.timedelta(days=1)
 
+#creating csv files for insertion into database
 import csv
 
 def write_csv(filename, rows):
