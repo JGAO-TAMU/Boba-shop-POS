@@ -3,18 +3,17 @@ package bobaapp.views;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.Point;
 import bobaapp.models.*;
+import bobaapp.utils.DbUtil;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ModificationsPanel extends JPanel {
     private bobaapp.models.MenuItem selectedDrink;
-    private JLabel titleLabel; // Add field declaration
+    private JLabel titleLabel;
     
     private Color lightYellowBackground = new Color(255, 255, 204);
     private Color lightGrayPanel = new Color(220, 220, 225);
@@ -23,14 +22,14 @@ public class ModificationsPanel extends JPanel {
     private Color selectedCellColor = new Color(173, 216, 230); // Light blue for selection
     
     // Tables for tracking selections
-    private JTable iceTable;
-    private JTable sugarTable;
-    private JTable toppingsTable;
+    private Map<String, JTable> categoryTables = new HashMap<>();
+    private Map<String, Set<Point>> categorySelections = new HashMap<>();
+    private Map<String, Point> singleSelectionCategories = new HashMap<>();
     
-    // For tracking selected cells
-    private Point iceSelection = new Point(0, 0); // Default: Regular Ice
-    private Point sugarSelection = new Point(0, 0); // Default: 100% Sugar
-    private Set<Point> toppingsSelection = new HashSet<>();
+    // Keep track of selected modifications
+    private Set<Modification> selectedModifications = new HashSet<>();
+    // Store all modifications by category
+    private Map<String, List<Modification>> modificationsByCategory = new HashMap<>();
     
     public ModificationsPanel() {
         // Set up the panel
@@ -41,7 +40,6 @@ public class ModificationsPanel extends JPanel {
         mainPanel.setBackground(lightYellowBackground);
         mainPanel.setLayout(new BorderLayout(20, 20));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-    
         
         // Options on right
         JPanel optionsPanel = new JPanel();
@@ -54,7 +52,7 @@ public class ModificationsPanel extends JPanel {
         contentPanel.setBackground(lightYellowBackground);
         
         // Title at top
-        titleLabel = new JLabel("Select a Drink", SwingConstants.CENTER); // Initialize titleLabel
+        titleLabel = new JLabel("Select a Drink", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         contentPanel.add(titleLabel, BorderLayout.NORTH);
         
@@ -64,74 +62,61 @@ public class ModificationsPanel extends JPanel {
         customizationPanel.setLayout(new BoxLayout(customizationPanel, BoxLayout.Y_AXIS));
         customizationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         
-        // Create Ice Level section with table
-        JLabel iceLevelLabel = new JLabel("Ice Level");
-        iceLevelLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        iceLevelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(iceLevelLabel);
-        customizationPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        // Load modifications from the database
+        modificationsByCategory = DbUtil.getModificationsByCategory();
         
-        // Ice level table
-        String[] iceColumns = {"", "", ""};
-        Object[][] iceData = {
-            {"Regular Ice", "Light Ice", ""},
-            {"No Ice", "Extra Ice", ""}
-        };
-        iceTable = createCustomTable(iceColumns, iceData);
-        setupTableSelection(iceTable, "ice");
-        JPanel iceTablePanel = new JPanel(new BorderLayout());
-        iceTablePanel.setBackground(lightGrayPanel);
-        iceTablePanel.add(iceTable);
-        iceTablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(iceTablePanel);
-        
-        customizationPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        
-        // Create Sugar Level section with table
-        JLabel sugarLevelLabel = new JLabel("Sugar Level");
-        sugarLevelLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        sugarLevelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(sugarLevelLabel);
-        customizationPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        
-        // Sugar level table
-        String[] sugarColumns = {"", "", ""};
-        Object[][] sugarData = {
-            {"100% Sugar", "75% Sugar", ""},
-            {"50% Sugar", "No Sugar", ""}
-        };
-        sugarTable = createCustomTable(sugarColumns, sugarData);
-        setupTableSelection(sugarTable, "sugar");
-        JPanel sugarTablePanel = new JPanel(new BorderLayout());
-        sugarTablePanel.setBackground(lightGrayPanel);
-        sugarTablePanel.add(sugarTable);
-        sugarTablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(sugarTablePanel);
-        
-        customizationPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        
-        // Create Toppings section with table
-        JLabel toppingsLabel = new JLabel("Toppings");
-        toppingsLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        toppingsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(toppingsLabel);
-        customizationPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        
-        // Toppings table
-        String[] toppingsColumns = {"", "", ""};
-        Object[][] toppingsData = {
-            {"Boba", "Mini Pearls", "Strawberry Boba"},
-            {"Aloe Vera", "Coffee Jelly", "Coconut Jelly"},
-            {"Egg Pudding", "Mango Jelly", "Grass Jelly"},
-            {"Almond Pudding", "Lychee", "White Pearls"}
-        };
-        toppingsTable = createCustomTable(toppingsColumns, toppingsData);
-        setupTableSelection(toppingsTable, "toppings");
-        JPanel toppingsTablePanel = new JPanel(new BorderLayout());
-        toppingsTablePanel.setBackground(lightGrayPanel);
-        toppingsTablePanel.add(toppingsTable);
-        toppingsTablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        customizationPanel.add(toppingsTablePanel);
+        // For each category, create a section with modifications
+        for (String category : modificationsByCategory.keySet()) {
+            // Create header label for the category
+            JLabel categoryLabel = new JLabel(category);
+            categoryLabel.setFont(new Font("Arial", Font.BOLD, 16));
+            categoryLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            customizationPanel.add(categoryLabel);
+            customizationPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            
+            List<Modification> mods = modificationsByCategory.get(category);
+            
+            // Create table data
+            int totalMods = mods.size();
+            int cols = 3; // Number of columns
+            int rows = (totalMods + cols - 1) / cols; // Calculate rows needed
+            
+            String[] columns = new String[cols];
+            Object[][] data = new Object[rows][cols];
+            
+            // Fill the table data with modifications
+            for (int i = 0; i < totalMods; i++) {
+                int row = i / cols;
+                int col = i % cols;
+                data[row][col] = mods.get(i);
+            }
+            
+            // Create table for this category
+            JTable table = createCustomTable(columns, data);
+            
+            // Setup selection behavior based on category
+            boolean isSingleSelect = "Ice".equals(category) || "Sugar".equals(category);
+            
+            if (isSingleSelect) {
+                // For Ice and Sugar, we allow only one selection
+                singleSelectionCategories.put(category, new Point(0, 0)); // Default selection
+                categorySelections.put(category, new HashSet<>());
+            } else {
+                // For other categories like Toppings, allow multiple selections
+                categorySelections.put(category, new HashSet<>());
+            }
+            
+            setupTableSelection(table, category);
+            categoryTables.put(category, table);
+            
+            JPanel tablePanel = new JPanel(new BorderLayout());
+            tablePanel.setBackground(lightGrayPanel);
+            tablePanel.add(table);
+            tablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            customizationPanel.add(tablePanel);
+            
+            customizationPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        }
         
         JScrollPane scrollPane = new JScrollPane(customizationPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -144,7 +129,7 @@ public class ModificationsPanel extends JPanel {
         rightPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         rightPanel.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
 
-        // Remove the button and add a MouseListener to the panel
+        // Add clickable area for adding drink to order
         rightPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -152,7 +137,6 @@ public class ModificationsPanel extends JPanel {
             }
         });
 
-        // Optionally, you can add a label to indicate the clickable area
         JLabel addDrinkLabel = new JLabel("Add Drink", SwingConstants.CENTER);
         addDrinkLabel.setPreferredSize(new Dimension(120, 60));
         addDrinkLabel.setOpaque(true);
@@ -167,11 +151,23 @@ public class ModificationsPanel extends JPanel {
         // Add main panel to this panel
         add(mainPanel, BorderLayout.CENTER);
         
-        // Set default selections for ice and sugar level
+        // Set default selections for categories with single selection
         SwingUtilities.invokeLater(() -> {
-            // Apply initial selections
-            applySelection(iceTable, iceSelection, true);
-            applySelection(sugarTable, sugarSelection, true);
+            for (String category : singleSelectionCategories.keySet()) {
+                JTable table = categoryTables.get(category);
+                Point selection = singleSelectionCategories.get(category);
+                if (table != null && selection != null) {
+                    applySelection(table, selection, true);
+                    
+                    // Add the default selected modification to selectedModifications
+                    if (selection.y < table.getRowCount() && selection.x < table.getColumnCount()) {
+                        Object value = table.getValueAt(selection.y, selection.x);
+                        if (value instanceof Modification) {
+                            selectedModifications.add((Modification) value);
+                        }
+                    }
+                }
+            }
         });
     }
     
@@ -181,21 +177,34 @@ public class ModificationsPanel extends JPanel {
     }
     
     private void addDrinkToOrder() {
-        // Get selected modifications
-        String iceLevel = (String) iceTable.getValueAt(iceSelection.y, iceSelection.x);
-        String sugarLevel = (String) sugarTable.getValueAt(sugarSelection.y, sugarSelection.x);
+        if (selectedDrink == null) {
+            JOptionPane.showMessageDialog(this, "Please select a drink first", "No Drink Selected", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         
-        // Get selected toppings
-        List<String> selectedToppings = new ArrayList<>();
-        for (Point p : toppingsSelection) {
-            String topping = (String) toppingsTable.getValueAt(p.y, p.x);
-            if (topping != null && !topping.isEmpty()) {
-                selectedToppings.add(topping);
+        // Get selected modifications from each category
+        List<String> modificationNames = new ArrayList<>();
+        
+        for (Modification mod : selectedModifications) {
+            modificationNames.add(mod.getName());
+            // Note: The OrderItem constructor will handle the pricing
+        }
+        
+        // Find specific ice and sugar selections
+        String iceLevel = "Regular Ice"; // Default
+        String sugarLevel = "100% Sugar"; // Default
+        
+        for (Modification mod : selectedModifications) {
+            String category = mod.getCategory();
+            if ("Ice".equals(category)) {
+                iceLevel = mod.getName();
+            } else if ("Sugar".equals(category)) {
+                sugarLevel = mod.getName();
             }
         }
         
-        // Create new order item with quantities
-        OrderItem orderItem = new OrderItem(selectedDrink, iceLevel, sugarLevel, selectedToppings);
+        // Create new order item with selections
+        OrderItem orderItem = new OrderItem(selectedDrink, iceLevel, sugarLevel, modificationNames);
         CurrentOrder.getInstance().addItem(orderItem);
         
         // Show checkout panel
@@ -228,25 +237,28 @@ public class ModificationsPanel extends JPanel {
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, false, false, row, column);
 
-                // Check if this is the selected cell (handled by our custom selection logic)
-                Point selection = new Point(column, row);
-                if (table == iceTable) {
-                    isSelected = iceSelection != null && iceSelection.equals(selection);
-                } else if (table == sugarTable) {
-                    isSelected = sugarSelection != null && sugarSelection.equals(selection);
-                } else if (table == toppingsTable) {
-                    isSelected = toppingsSelection.contains(selection); // Check if it's in the set
+                // Only render if there's actual content
+                if (value == null) {
+                    c.setBackground(lightGrayPanel);
+                    setText("");
+                    return c;
                 }
-
+                
+                // Get the actual text for display
+                if (value instanceof Modification) {
+                    Modification mod = (Modification) value;
+                    setText(mod.toString());
+                    
+                    // Determine if selected based on our tracking
+                    isSelected = selectedModifications.contains(mod);
+                }
+                
                 if (isSelected) {
                     c.setBackground(selectedCellColor);
                 } else {
                     c.setBackground(lightGrayPanel);
                 }
-
-                // Only enable cell if it has content
-                c.setEnabled(value != null && !value.toString().isEmpty());
-
+                
                 return c;
             }
         });
@@ -254,7 +266,7 @@ public class ModificationsPanel extends JPanel {
         return table;
     }
     
-    private void setupTableSelection(JTable table, String tableType) {
+    private void setupTableSelection(JTable table, String category) {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -264,27 +276,38 @@ public class ModificationsPanel extends JPanel {
                 // Only allow selection if cell has content
                 if (row >= 0 && col >= 0) {
                     Object cellValue = table.getValueAt(row, col);
-                    if (cellValue != null && !cellValue.toString().isEmpty()) {
-                        Point newSelection = new Point(col, row);
-    
-                        if (tableType.equals("ice")) {
-                            iceSelection = newSelection;
-                        } else if (tableType.equals("sugar")) {
-                            sugarSelection = newSelection;
-                        } else if (tableType.equals("toppings")) {
-                            if (toppingsSelection.contains(newSelection)) {
-                                // Deselect if already selected
-                                toppingsSelection.remove(newSelection);
+                    if (cellValue instanceof Modification) {
+                        Modification mod = (Modification) cellValue;
+                        
+                        if ("Ice".equals(category) || "Sugar".equals(category)) {
+                            // Single selection for these categories
+                            // Remove any previous selection from this category
+                            Iterator<Modification> iterator = selectedModifications.iterator();
+                            while (iterator.hasNext()) {
+                                Modification selected = iterator.next();
+                                if (category.equals(selected.getCategory())) {
+                                    iterator.remove();
+                                }
+                            }
+                            
+                            // Add the new selection
+                            selectedModifications.add(mod);
+                            
+                            // Update visual selection point
+                            singleSelectionCategories.put(category, new Point(col, row));
+                        } else {
+                            // Toggle selection for multi-select categories
+                            if (selectedModifications.contains(mod)) {
+                                selectedModifications.remove(mod);
                             } else {
-                                // Add new selection
-                                toppingsSelection.add(newSelection);
+                                selectedModifications.add(mod);
                             }
                         }
-    
+                        
                         // Repaint all tables to update selection highlighting
-                        iceTable.repaint();
-                        sugarTable.repaint();
-                        toppingsTable.repaint();
+                        for (JTable t : categoryTables.values()) {
+                            t.repaint();
+                        }
                     }
                 }
             }
@@ -294,9 +317,14 @@ public class ModificationsPanel extends JPanel {
     private void applySelection(JTable table, Point selection, boolean initialSelection) {
         if (selection != null && table != null) {
             // Make sure we're only selecting a valid cell
-            Object cellValue = table.getValueAt(selection.y, selection.x);
-            if (cellValue != null && !cellValue.toString().isEmpty()) {
-                table.repaint();
+            if (selection.y < table.getRowCount() && selection.x < table.getColumnCount()) {
+                Object cellValue = table.getValueAt(selection.y, selection.x);
+                if (cellValue instanceof Modification) {
+                    if (initialSelection) {
+                        selectedModifications.add((Modification) cellValue);
+                    }
+                    table.repaint();
+                }
             }
         }
     }
