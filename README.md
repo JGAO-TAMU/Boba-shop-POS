@@ -8,8 +8,18 @@ The manager GUI can see order trends based on time, ingredient, drink, etc. They
 
 The cashier side can see the orders an employee is assigned to make and take customers' orders. While an employee is clocked in, an order has a timestamp of when the order is placed. The system will update the inventory based on what has been ordered. 
 
-Tech Stack: 
+## Tech Stack: 
 - Technologies: Figma, AWS
 - Frontend: Java Swing
 - API: Java Database Connectivity
 - Database/Backend: PostgreSQL, Python
+
+## How to Run our Code
+````
+Compile: 
+javac -cp "GUI/postgresql-42.2.8.jar" -d GUI/bin (Get-ChildItem -Path GUI/bobaapp -Recurse -Filter "*.java" | ForEach-Object { $_.FullName })
+
+
+Run: 
+java -cp "GUI/bin;postgresql-42.2.8.jar" bobaapp.Main
+`````
