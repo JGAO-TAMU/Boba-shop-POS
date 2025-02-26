@@ -12,14 +12,27 @@ public class HomePanel extends JPanel {
     private JPanel parentPanel;
 
     public HomePanel() {
-        setLayout(new GridLayout(0, 4, 10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setBackground(new Color(255, 255, 224));
+        setLayout(new BorderLayout());
         
-        loadDrinks();
+        // add logout button to top right
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setBackground(new Color(255, 255, 224));
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> logout());
+        topPanel.add(logoutButton);
+        add(topPanel, BorderLayout.NORTH);
+        
+        // menu grid in center
+        JPanel menuGrid = new JPanel(new GridLayout(0, 4, 10, 10));
+        menuGrid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        menuGrid.setBackground(new Color(255, 255, 224));
+        add(menuGrid, BorderLayout.CENTER);
+        
+        // load drinks into the grid
+        loadDrinksToGrid(menuGrid);
     }
 
-    private void loadDrinks() {
+    private void loadDrinksToGrid(JPanel menuGrid) {
         List<MenuItem> menuItems = MenuDAO.getMenuItems();
         
         for (MenuItem item : menuItems) {
@@ -29,7 +42,7 @@ public class HomePanel extends JPanel {
             
             drinkButton.setBackground(new Color(255, 218, 185));
             drinkButton.addActionListener(e -> showModificationsPanel(item));
-            add(drinkButton);
+            menuGrid.add(drinkButton);
         }
     }
 
@@ -38,13 +51,24 @@ public class HomePanel extends JPanel {
             cardLayout = (CardLayout) getParent().getLayout();
             parentPanel = (JPanel) getParent();
             
-            // Create new ModificationsPanel with the selected drink
+            // create new ModificationsPanel with the selected drink
             ModificationsPanel modPanel = new ModificationsPanel();
             modPanel.setDrink(item);
             
-            // Add the panel if it's not already there
             parentPanel.add(modPanel, "Modifications");
             cardLayout.show(parentPanel, "Modifications");
         }
+    }
+    
+    // method to handle logout
+    private void logout() {
+        // close the current frame
+        JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        currentFrame.dispose();
+        
+        // open the login frame
+        SwingUtilities.invokeLater(() -> {
+            new LoginFrame();
+        });
     }
 }
