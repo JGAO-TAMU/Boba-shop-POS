@@ -23,6 +23,14 @@ public class ManagerHomePanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(255, 255, 224));
 
+        // Add logout button to top right
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setBackground(new Color(255, 255, 224));
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> logout());
+        topPanel.add(logoutButton);
+        add(topPanel, BorderLayout.NORTH);
+
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // tabbedPane.addTab("Orders Over Time", createOrdersOverTimePanel());
@@ -244,5 +252,17 @@ public class ManagerHomePanel extends JPanel {
 
         // display the frame
         reportFrame.setVisible(true);
+    }
+
+    // method to handle logout
+    private void logout() {
+        // close the current frame
+        JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        currentFrame.dispose();
+        
+        // open the login frame
+        SwingUtilities.invokeLater(() -> {
+            new LoginFrame();
+        });
     }
 }
