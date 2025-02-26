@@ -1,3 +1,5 @@
 Database/*.csv
-GUI/bin/*/
+**/bin/
+**/bin/*
+*.class
 GUI/bobaapp/database/DatabaseConnection.java
