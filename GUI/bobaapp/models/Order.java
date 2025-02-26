@@ -6,17 +6,17 @@ public class Order {
     private int orderID;
     private Timestamp timestamp;
     private double price;
-    private int employeeID;
+    private String employeeName;
 
-    public Order(int orderID, Timestamp timestamp, double price, int employeeID) {
+    public Order(int orderID, Timestamp timestamp, double price, String employeeName) {
         this.orderID = orderID;
         this.timestamp = timestamp;
         this.price = price;
-        this.employeeID = employeeID;
+        this.employeeName = employeeName;
     }
 
     public int getOrderID() { return orderID; }
     public Timestamp getTimestamp() { return timestamp; }
     public double getPrice() { return price; }
-    public int getEmployeeID() { return employeeID; }
+    public String getEmployeeName() { return employeeName; }
 }

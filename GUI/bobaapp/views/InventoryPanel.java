@@ -7,22 +7,50 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 
 public class InventoryPanel extends JPanel {
     private JTable inventoryTable;
     private DefaultTableModel tableModel;
+    private JLabel summaryLabel;
+    private static final int LOW_STOCK_THRESHOLD = 10;
+    private boolean showLowStockWarnings = true;
 
     public InventoryPanel() {
         setLayout(new BorderLayout());
         
-        // Create table model
-        String[] columns = {"ID", "Item Name", "Quantity"};
-        tableModel = new DefaultTableModel(columns, 0);
-        inventoryTable = new JTable(tableModel);
+        // Create table model with non-editable cells
+        tableModel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable by default
+            }
+        };
         
-        // Add table to scroll pane
-        JScrollPane scrollPane = new JScrollPane(inventoryTable);
-        add(scrollPane, BorderLayout.CENTER);
+        // Add columns to table model
+        tableModel.addColumn("ID");
+        tableModel.addColumn("Ingredient Name");
+        tableModel.addColumn("Quantity");
+        
+        // Create table and set properties
+        inventoryTable = new JTable(tableModel);
+        inventoryTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        inventoryTable.getColumnModel().getColumn(1).setPreferredWidth(200);
+        inventoryTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+        
+        // Create summary label
+        summaryLabel = new JLabel("Loading inventory...");
+        
+        // Add to panel
+        add(new JScrollPane(inventoryTable), BorderLayout.CENTER);
+        add(summaryLabel, BorderLayout.SOUTH);
+        
+        // Load data when panel is shown
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshInventoryTable();
+            }
+        });
         
         // Create update button
         JButton updateButton = new JButton("Update Quantity");
@@ -143,15 +171,84 @@ public class InventoryPanel extends JPanel {
         }
     }
 
-    private void refreshInventoryTable() {
+    // Public method to refresh inventory table
+    public void refreshInventoryTable() {
+        // Clear the existing data
         tableModel.setRowCount(0);
-        List<InventoryItem> inventory = InventoryDAO.getInventory();
-        for (InventoryItem item : inventory) {
-            tableModel.addRow(new Object[]{
-                item.getIngredientID(),
-                item.getName(),
-                item.getQuantity()
+        
+        // Load fresh inventory data
+        List<Map<String, Object>> inventoryItems = InventoryDAO.getInventoryAsMaps();
+        
+        // Populate the table with the new data
+        for (Map<String, Object> item : inventoryItems) {
+            tableModel.addRow(new Object[] {
+                item.get("ingredientId"),
+                item.get("name"),
+                item.get("quantity")
             });
+        }
+        
+        // Update any visualization or summary information
+        updateInventorySummary();
+        
+        // Notify the user if any items are low in stock
+        checkLowStockItems();
+        
+        // Debug message to confirm refresh
+        System.out.println("Inventory table refreshed with " + inventoryItems.size() + " items");
+    }
+    
+    /**
+     * Update any summary information about inventory
+     */
+    private void updateInventorySummary() {
+        // Implementation depends on your UI design
+        // For example, you might update a status label showing total items in inventory
+        if (summaryLabel != null) {
+            int itemCount = inventoryTable.getRowCount();
+            int lowStockCount = countLowStockItems();
+            summaryLabel.setText(String.format("Total Items: %d | Low Stock: %d", itemCount, lowStockCount));
+        }
+    }
+    
+    /**
+     * Count items that are low in stock
+     */
+    private int countLowStockItems() {
+        int count = 0;
+        
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            int quantity = ((Number) tableModel.getValueAt(i, 2)).intValue();
+            if (quantity < LOW_STOCK_THRESHOLD) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Check for items that are low in stock and highlight them or show warnings
+     */
+    private void checkLowStockItems() {
+        boolean hasLowStock = false;
+        
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            int quantity = ((Number) tableModel.getValueAt(i, 2)).intValue();
+            if (quantity < LOW_STOCK_THRESHOLD) {
+                hasLowStock = true;
+                // You might highlight these rows or mark them in some way
+            }
+        }
+        
+        if (hasLowStock && showLowStockWarnings) {
+            // Show a warning about low stock items
+            JOptionPane.showMessageDialog(
+                this,
+                "Some inventory items are running low on stock!",
+                "Low Stock Warning",
+                JOptionPane.WARNING_MESSAGE
+            );
         }
     }
 }
