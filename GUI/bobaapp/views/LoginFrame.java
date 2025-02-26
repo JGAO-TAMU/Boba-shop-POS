@@ -57,12 +57,12 @@ public class LoginFrame extends JFrame {
 
                 if (accessLevel == -1) {
                     JOptionPane.showMessageDialog(LoginFrame.this, "Invalid Employee ID.", "Error", JOptionPane.ERROR_MESSAGE);
-                } else if (accessLevel == 0) {
+                } else if (accessLevel == 1) {
                     JOptionPane.showMessageDialog(LoginFrame.this, "Logged in as Cashier.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     // Navigate to cashier view
                     new MainFrame();
                     LoginFrame.this.dispose();
-                } else if (accessLevel == 1) {
+                } else if (accessLevel == 0) {
                     JOptionPane.showMessageDialog(LoginFrame.this, "Logged in as Manager.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     // Navigate to manager view
                     new ManagerMainFrame();
