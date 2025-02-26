@@ -30,15 +30,15 @@ public class MainFrame extends JFrame {
         sideMenu.setBackground(new Color(255, 255, 224));
 
         JButton homeBtn = new JButton("Home");
-        JButton inventoryBtn = new JButton("Inventory");
-        JButton menuBtn = new JButton("Menu");
-        JButton orderHistoryBtn = new JButton("Order History");
+        // JButton inventoryBtn = new JButton("Inventory");
+        // JButton menuBtn = new JButton("Menu");
+        // JButton orderHistoryBtn = new JButton("Order History");
         JButton checkoutBtn = new JButton("Checkout");
 
         sideMenu.add(homeBtn);
-        sideMenu.add(inventoryBtn);
-        sideMenu.add(menuBtn);
-        sideMenu.add(orderHistoryBtn);
+        // sideMenu.add(inventoryBtn);
+        // sideMenu.add(menuBtn);
+        // sideMenu.add(orderHistoryBtn);
         sideMenu.add(checkoutBtn);
 
         add(sideMenu, BorderLayout.WEST);
@@ -48,9 +48,9 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         mainPanel.add(new HomePanel(), "Home");
-        mainPanel.add(new InventoryPanel(), "Inventory");
-        mainPanel.add(new MenuPanel(), "Menu");
-        mainPanel.add(new OrderHistoryPanel(), "OrderHistory");
+        // mainPanel.add(new InventoryPanel(), "Inventory");
+        // mainPanel.add(new MenuPanel(), "Menu");
+        // mainPanel.add(new OrderHistoryPanel(), "OrderHistory");
         mainPanel.add(new CheckoutPanel(), "Checkout");
         mainPanel.add(new ModificationsPanel(), "Modifications"); // Add the new panel
 
@@ -58,9 +58,9 @@ public class MainFrame extends JFrame {
 
         // Button Actions
         homeBtn.addActionListener(e -> cardLayout.show(mainPanel, "Home"));
-        inventoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "Inventory"));
-        menuBtn.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
-        orderHistoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "OrderHistory"));
+        // inventoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "Inventory"));
+        // menuBtn.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
+        // orderHistoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "OrderHistory"));
         checkoutBtn.addActionListener(e -> cardLayout.show(mainPanel, "Checkout"));
 
         setVisible(true);
