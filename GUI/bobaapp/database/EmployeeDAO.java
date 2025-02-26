@@ -59,8 +59,20 @@ public class EmployeeDAO {
             pstmt.setInt(1, employee.getEmployeeID());
             pstmt.setString(2, employee.getName());
             pstmt.setInt(3, employee.getAccessLevel());
-            pstmt.setTimestamp(4, employee.getClockIn());
-            pstmt.setTimestamp(5, employee.getClockOut());
+            
+            // Handle null timestamp values
+            if (employee.getClockIn() != null) {
+                pstmt.setTimestamp(4, employee.getClockIn());
+            } else {
+                pstmt.setNull(4, java.sql.Types.TIMESTAMP);
+            }
+            
+            if (employee.getClockOut() != null) {
+                pstmt.setTimestamp(5, employee.getClockOut());
+            } else {
+                pstmt.setNull(5, java.sql.Types.TIMESTAMP);
+            }
+            
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
