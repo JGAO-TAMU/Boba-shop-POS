@@ -60,12 +60,38 @@ public class DatabaseUtils {
     }
     
     /**
+     * Fixes the orders sequence to match the max orderid in the table.
+     */
+    public static void fixOrdersSequence() {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // Find the maximum order ID
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COALESCE(MAX(orderid), 0) + 1 FROM orders")) {
+                
+                if (rs.next()) {
+                    int nextId = rs.getInt(1);
+                    
+                    // Set the sequence to the next available ID
+                    try (Statement updateStmt = conn.createStatement()) {
+                        updateStmt.execute("ALTER SEQUENCE orders_orderid_seq RESTART WITH " + nextId);
+                        System.out.println("Orders sequence successfully reset to " + nextId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fixing orders sequence: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Checks for and fixes any database inconsistencies.
      * This could be expanded to handle more types of issues.
      */
     public static void performDatabaseMaintenance() {
         fixDrinksSequence();
         fixModificationsSequence();
+        fixOrdersSequence(); // Add this line
         // Add other maintenance tasks as needed
     }
     

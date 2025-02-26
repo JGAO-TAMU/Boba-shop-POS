@@ -11,27 +11,60 @@ public class OrdersDAO {
     public static int placeOrder(int employeeId, double price) {
         int orderId = -1;
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             // Make sure we don't specify any columns - let the DB handle it all
-             PreparedStatement pstmt = conn.prepareStatement(
-                "INSERT INTO orders (timestamp, price, employeeid) VALUES (NOW(), ?, ?)",
-                Statement.RETURN_GENERATED_KEYS)) {
-            
-            pstmt.setDouble(1, price);
-            pstmt.setInt(2, employeeId);
-            
-            int rowsAffected = pstmt.executeUpdate();
-            
-            if (rowsAffected > 0) {
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        orderId = rs.getInt(1);
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // First ensure we have a clean sequence by explicitly locking the orders table
+            try (Statement lockStmt = conn.createStatement()) {
+                // Start a transaction and use an advisory lock to prevent race conditions
+                lockStmt.execute("BEGIN");
+                lockStmt.execute("LOCK TABLE orders IN EXCLUSIVE MODE");
+                
+                // Get the next order ID within the transaction
+                try (Statement seqStmt = conn.createStatement();
+                     ResultSet seqRs = seqStmt.executeQuery("SELECT COALESCE(MAX(orderid), 0) + 1 FROM orders")) {
+                    
+                    if (seqRs.next()) {
+                        orderId = seqRs.getInt(1);
+                        System.out.println("Generated new order ID: " + orderId);
+                        
+                        // Now insert using the manually generated ID
+                        try (PreparedStatement pstmt = conn.prepareStatement(
+                            "INSERT INTO orders (orderid, timestamp, price, employeeid) VALUES (?, NOW(), ?, ?)")) {
+                            
+                            pstmt.setInt(1, orderId);
+                            pstmt.setDouble(2, price);
+                            pstmt.setInt(3, employeeId);
+                            
+                            int rowsAffected = pstmt.executeUpdate();
+                            if (rowsAffected <= 0) {
+                                orderId = -1;  // Reset if insert failed
+                                System.err.println("Insert failed with order ID: " + orderId);
+                            } else {
+                                // Update the sequence to prevent future conflicts
+                                try (Statement updateStmt = conn.createStatement()) {
+                                    updateStmt.execute("ALTER SEQUENCE orders_orderid_seq RESTART WITH " + (orderId + 1));
+                                    System.out.println("Sequence updated successfully to: " + (orderId + 1));
+                                }
+                            }
+                        }
                     }
                 }
+                
+                // Commit the transaction
+                lockStmt.execute("COMMIT");
+            } catch (SQLException ex) {
+                // If anything goes wrong, rollback
+                try {
+                    System.err.println("Error in transaction, rolling back: " + ex.getMessage());
+                    conn.createStatement().execute("ROLLBACK");
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Error rolling back: " + rollbackEx.getMessage());
+                }
+                throw ex; // Re-throw the original exception
             }
         } catch (SQLException e) {
             System.err.println("Error in placeOrder: " + e.getMessage());
             e.printStackTrace();
+            orderId = -1;
         }
         
         return orderId;
@@ -188,5 +221,53 @@ public class OrdersDAO {
         }
         
         return orders;
+    }
+
+    // Update the orders sequence to a specific value
+    private static void updateOrderSequence(Connection conn, int newValue) {
+        try (Statement stmt = conn.createStatement()) {
+            String sql = "ALTER SEQUENCE orders_orderid_seq RESTART WITH " + newValue;
+            stmt.execute(sql);
+            System.out.println("Updated orders sequence to " + newValue);
+        } catch (SQLException e) {
+            System.err.println("Error updating order sequence: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Public method to reset the orders sequence - Updated with transaction
+    public static boolean resetOrdersSequence() {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // Use a transaction with exclusive lock to prevent race conditions
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("BEGIN");
+                stmt.execute("LOCK TABLE orders IN EXCLUSIVE MODE");
+                
+                // Find the maximum order ID
+                try (ResultSet rs = stmt.executeQuery("SELECT COALESCE(MAX(orderid), 0) + 1 FROM orders")) {
+                    if (rs.next()) {
+                        int nextId = rs.getInt(1);
+                        // Update the sequence directly
+                        stmt.execute("ALTER SEQUENCE orders_orderid_seq RESTART WITH " + nextId);
+                        System.out.println("Orders sequence reset to " + nextId);
+                    }
+                }
+                
+                stmt.execute("COMMIT");
+                return true;
+            } catch (SQLException ex) {
+                try {
+                    System.err.println("Error in transaction, rolling back: " + ex.getMessage());
+                    conn.createStatement().execute("ROLLBACK");
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Error rolling back: " + rollbackEx.getMessage());
+                }
+                throw ex;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error resetting orders sequence: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }

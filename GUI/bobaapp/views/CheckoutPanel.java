@@ -65,11 +65,18 @@ public class CheckoutPanel extends JPanel {
         CurrentOrder currentOrder = CurrentOrder.getInstance();
         
         try {
-            // Reset all sequences to prevent ID conflicts
+            // Temporarily disable the confirm button to prevent multiple orders
+            confirmButton.setEnabled(false);
+            
+            // Reset sequences in a specific order
+            System.out.println("Resetting sequences before placing order...");
+            OrdersDAO.resetOrdersSequence();
             OrdersDAO.resetDrinksSequence();
             
+            System.out.println("Placing order...");
             // Place the order and get the order ID
             int orderId = OrdersDAO.placeOrder(1, currentOrder.getTotal());
+            System.out.println("Order placed with ID: " + orderId);
             
             if (orderId != -1) {
                 // Add each drink and its modifications
@@ -162,12 +169,16 @@ public class CheckoutPanel extends JPanel {
                     "Order Error", 
                     JOptionPane.ERROR_MESSAGE);
             }
+            
+            confirmButton.setEnabled(true);
         } catch (Exception ex) {
+            confirmButton.setEnabled(true);
+            System.err.println("Error in confirmOrder: " + ex.getMessage());
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, 
                 "Error processing order: " + ex.getMessage(), 
                 "Order Error", 
                 JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
         }
     }
     
