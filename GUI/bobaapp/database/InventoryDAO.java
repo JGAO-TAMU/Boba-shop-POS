@@ -40,4 +40,37 @@ public class InventoryDAO {
             e.printStackTrace();
         }
     }
+
+    public static boolean addInventoryItem(String name, int quantity) {
+        String query = "INSERT INTO inventory (name, quantity) VALUES (?, ?);";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, name);
+            stmt.setInt(2, quantity);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteInventoryItem(int ingredientID) {
+        String query = "DELETE FROM inventory WHERE ingredientID = ?;";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setInt(1, ingredientID);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

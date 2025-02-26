@@ -26,16 +26,18 @@ public class MainFrame extends JFrame {
 
         // Side Menu
         JPanel sideMenu = new JPanel();
-        sideMenu.setLayout(new GridLayout(4, 1, 10, 10));
+        sideMenu.setLayout(new GridLayout(5, 1, 10, 10));  // Changed to 5 rows
         sideMenu.setBackground(new Color(255, 255, 224));
 
         JButton homeBtn = new JButton("Home");
         JButton inventoryBtn = new JButton("Inventory");
+        JButton menuBtn = new JButton("Menu");  // New button
         JButton orderHistoryBtn = new JButton("Order History");
         JButton checkoutBtn = new JButton("Checkout");
 
         sideMenu.add(homeBtn);
         sideMenu.add(inventoryBtn);
+        sideMenu.add(menuBtn);  // Add new button
         sideMenu.add(orderHistoryBtn);
         sideMenu.add(checkoutBtn);
 
@@ -47,6 +49,7 @@ public class MainFrame extends JFrame {
 
         mainPanel.add(new HomePanel(), "Home");
         mainPanel.add(new InventoryPanel(), "Inventory");
+        mainPanel.add(new MenuPanel(), "Menu");  // Add new panel
         mainPanel.add(new OrderHistoryPanel(), "OrderHistory");
         mainPanel.add(new CheckoutPanel(), "Checkout");
 
@@ -55,6 +58,7 @@ public class MainFrame extends JFrame {
         // Button Actions
         homeBtn.addActionListener(e -> cardLayout.show(mainPanel, "Home"));
         inventoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "Inventory"));
+        menuBtn.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));  // New action
         orderHistoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "OrderHistory"));
         checkoutBtn.addActionListener(e -> cardLayout.show(mainPanel, "Checkout"));
 
