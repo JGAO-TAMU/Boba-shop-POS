@@ -143,7 +143,7 @@ public class MenuPanel extends JPanel {
         int menuId = (int) menuTable.getValueAt(selectedRow, 0);
         String drinkName = (String) menuTable.getValueAt(selectedRow, 1);
 
-        // Show current ingredients
+        // show current ingredients
         List<Map<String, Object>> currentIngredients = DrinkIngredientsDAO.getIngredientsForDrink(menuId);
         StringBuilder currentIngredientsText = new StringBuilder("Current ingredients:\n");
         for (Map<String, Object> ingredient : currentIngredients) {
@@ -155,7 +155,7 @@ public class MenuPanel extends JPanel {
                                 .append("\n");
         }
 
-        // Get available ingredients
+        // get available ingredients
         List<InventoryItem> availableIngredients = InventoryDAO.getInventory();
         StringBuilder availableIngredientsText = new StringBuilder("\nAvailable ingredients:\n");
         for (InventoryItem ingredient : availableIngredients) {
@@ -165,10 +165,10 @@ public class MenuPanel extends JPanel {
                                   .append(")\n");
         }
 
-        // Create input panel
+        // create input panel
         JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
         
-        // Show both current and available ingredients
+        // show both current and available ingredients
         JTextArea ingredientsArea = new JTextArea(
             currentIngredientsText.toString() + 
             "\n----------------------------------------\n" +
@@ -176,7 +176,7 @@ public class MenuPanel extends JPanel {
             10, 30);
         ingredientsArea.setEditable(false);
         panel.add(new JScrollPane(ingredientsArea));
-        panel.add(new JLabel()); // spacing
+        panel.add(new JLabel());
         
         JTextField ingredientIdField = new JTextField();
         JTextField quantityField = new JTextField();
