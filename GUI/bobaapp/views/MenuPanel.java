@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.ArrayList;
 
 public class MenuPanel extends JPanel {
-    // Interface for menu item selection callback
     public interface MenuItemSelectionListener {
         void onMenuItemSelected(MenuItem item);
     }
@@ -27,13 +26,11 @@ public class MenuPanel extends JPanel {
     public MenuPanel() {
         setLayout(new BorderLayout());
         
-        // Create table
         String[] columns = {"ID", "Drink Name", "Price"};
         tableModel = new DefaultTableModel(columns, 0);
         menuTable = new JTable(tableModel);
         add(new JScrollPane(menuTable), BorderLayout.CENTER);
         
-        // Add double-click listener for item selection
         menuTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -46,7 +43,6 @@ public class MenuPanel extends JPanel {
                         
                         MenuItem selectedItem = new MenuItem(menuId, name, price);
                         
-                        // Notify all listeners
                         for (MenuItemSelectionListener listener : selectionListeners) {
                             listener.onMenuItemSelected(selectedItem);
                         }
@@ -55,7 +51,6 @@ public class MenuPanel extends JPanel {
             }
         });
         
-        // Create buttons
         JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Drink");
         JButton updateButton = new JButton("Update Price");
@@ -79,12 +74,12 @@ public class MenuPanel extends JPanel {
         refreshMenuTable();
     }
 
-    // Method to add listener for menu item selection
+    // method to add listener for menu item selection
     public void addMenuItemSelectionListener(MenuItemSelectionListener listener) {
         selectionListeners.add(listener);
     }
     
-    // Method to set ModificationsPanel (for backward compatibility)
+    // method to set ModificationsPanel (for backward compatibility)
     public void setModificationsPanel(ModificationsPanel panel) {
         this.modificationsPanel = panel;
     }
@@ -98,7 +93,7 @@ public class MenuPanel extends JPanel {
             
             MenuItem selectedItem = new MenuItem(menuId, name, price);
             
-            // Notify all listeners
+            // notify all listeners
             for (MenuItemSelectionListener listener : selectionListeners) {
                 listener.onMenuItemSelected(selectedItem);
             }
@@ -271,7 +266,6 @@ public class MenuPanel extends JPanel {
         viewPanel.add(scrollPane, BorderLayout.CENTER);
         viewPanel.add(buttonPanel, BorderLayout.SOUTH);
         
-        // Tab 2: Add new ingredient
         JPanel addPanel = new JPanel(new BorderLayout(10, 10));
         addPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
@@ -280,7 +274,6 @@ public class MenuPanel extends JPanel {
         addTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         addTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         
-        // Get available ingredients
         List<InventoryItem> availableIngredients = InventoryDAO.getInventory();
         DefaultTableModel availableModel = new DefaultTableModel(
             new Object[]{"ID", "Name", "Current Stock"}, 0);
@@ -302,7 +295,6 @@ public class MenuPanel extends JPanel {
         JScrollPane availableScrollPane = new JScrollPane(availableTable);
         availableScrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         
-        // Panel for quantity input and add button
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         
@@ -330,7 +322,6 @@ public class MenuPanel extends JPanel {
                     if (DrinkIngredientsDAO.addIngredientToDrink(menuId, ingredientId, quantity)) {
                         JOptionPane.showMessageDialog(addPanel, "Ingredient added successfully.");
                         
-                        // Refresh the view tab
                         List<Map<String, Object>> updatedIngredients = 
                             DrinkIngredientsDAO.getIngredientsForDrink(menuId);
                         
@@ -361,11 +352,9 @@ public class MenuPanel extends JPanel {
         addPanel.add(availableScrollPane, BorderLayout.CENTER);
         addPanel.add(controlPanel, BorderLayout.SOUTH);
         
-        // Add tabs to tabbed pane
         tabbedPane.addTab("Current Ingredients", viewPanel);
         tabbedPane.addTab("Add Ingredient", addPanel);
         
-        // Create custom JDialog for better sizing and appearance
         JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), 
                                      "Ingredients for " + drinkName, true);
         dialog.setLayout(new BorderLayout());
