@@ -212,7 +212,15 @@ public class MenuPanel extends JPanel {
         JTabbedPane tabbedPane = new JTabbedPane();
         
         // Tab 1: View current ingredients
-        JPanel viewPanel = new JPanel(new BorderLayout());
+        JPanel viewPanel = new JPanel(new BorderLayout(10, 10));
+        viewPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Title for current ingredients
+        JLabel titleLabel = new JLabel("Current Ingredients for " + drinkName);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        
         DefaultTableModel ingredientModel = new DefaultTableModel(
             new Object[]{"ID", "Name", "Quantity Used"}, 0);
         
@@ -225,9 +233,19 @@ public class MenuPanel extends JPanel {
         }
         
         JTable ingredientTable = new JTable(ingredientModel);
+        ingredientTable.setRowHeight(25);
+        ingredientTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        ingredientTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ingredientTable.setFillsViewportHeight(true);
+        
         JScrollPane scrollPane = new JScrollPane(ingredientTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         
         JButton removeButton = new JButton("Remove Selected Ingredient");
+        removeButton.setBackground(new Color(255, 102, 102));
+        removeButton.setForeground(Color.WHITE);
+        removeButton.setFocusPainted(false);
+        
         removeButton.addActionListener(e -> {
             int row = ingredientTable.getSelectedRow();
             if (row != -1) {
@@ -246,12 +264,21 @@ public class MenuPanel extends JPanel {
         });
         
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         buttonPanel.add(removeButton);
+        
+        viewPanel.add(titleLabel, BorderLayout.NORTH);
         viewPanel.add(scrollPane, BorderLayout.CENTER);
         viewPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         // Tab 2: Add new ingredient
-        JPanel addPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        JPanel addPanel = new JPanel(new BorderLayout(10, 10));
+        addPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel addTitleLabel = new JLabel("Add Ingredients to " + drinkName);
+        addTitleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        addTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        addTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         
         // Get available ingredients
         List<InventoryItem> availableIngredients = InventoryDAO.getInventory();
@@ -267,10 +294,26 @@ public class MenuPanel extends JPanel {
         }
         
         JTable availableTable = new JTable(availableModel);
-        JScrollPane availableScrollPane = new JScrollPane(availableTable);
+        availableTable.setRowHeight(25);
+        availableTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        availableTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        availableTable.setFillsViewportHeight(true);
         
-        JTextField quantityField = new JTextField("1");
+        JScrollPane availableScrollPane = new JScrollPane(availableTable);
+        availableScrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        
+        // Panel for quantity input and add button
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        
+        JLabel quantityLabel = new JLabel("Quantity:");
+        JTextField quantityField = new JTextField("1", 5);
+        quantityField.setHorizontalAlignment(JTextField.CENTER);
+        
         JButton addIngredientButton = new JButton("Add Selected Ingredient");
+        addIngredientButton.setBackground(new Color(100, 180, 100));
+        addIngredientButton.setForeground(Color.WHITE);
+        addIngredientButton.setFocusPainted(false);
         
         addIngredientButton.addActionListener(e -> {
             int row = availableTable.getSelectedRow();
@@ -310,32 +353,33 @@ public class MenuPanel extends JPanel {
             }
         });
         
-        JPanel quantityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        quantityPanel.add(new JLabel("Quantity:"));
-        quantityPanel.add(quantityField);
+        controlPanel.add(quantityLabel);
+        controlPanel.add(quantityField);
+        controlPanel.add(addIngredientButton);
         
-        addPanel.add(new JLabel("Available Ingredients:"));
-        addPanel.add(new JLabel(""));
-        addPanel.add(availableScrollPane);
-        addPanel.add(new JPanel()); // Empty panel for layout
-        addPanel.add(quantityPanel);
-        addPanel.add(addIngredientButton);
+        addPanel.add(addTitleLabel, BorderLayout.NORTH);
+        addPanel.add(availableScrollPane, BorderLayout.CENTER);
+        addPanel.add(controlPanel, BorderLayout.SOUTH);
         
         // Add tabs to tabbed pane
         tabbedPane.addTab("Current Ingredients", viewPanel);
         tabbedPane.addTab("Add Ingredient", addPanel);
         
-        // Show dialog with tabbed pane
-        JOptionPane.showOptionDialog(
-            this,
-            tabbedPane,
-            "Ingredients for " + drinkName,
-            JOptionPane.DEFAULT_OPTION,
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            new Object[]{"Close"},
-            "Close"
-        );
+        // Create custom JDialog for better sizing and appearance
+        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), 
+                                     "Ingredients for " + drinkName, true);
+        dialog.setLayout(new BorderLayout());
+        dialog.add(tabbedPane, BorderLayout.CENTER);
+        
+        JPanel closePanel = new JPanel();
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dialog.dispose());
+        closePanel.add(closeButton);
+        dialog.add(closePanel, BorderLayout.SOUTH);
+        
+        dialog.setSize(500, 400);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     private void refreshMenuTable() {
