@@ -133,4 +133,40 @@ public class ReportDAO {
 
         return ingredientUsage;
     }
+
+    /**
+     * Retrieves sales data by menu item within a specified time frame.
+     * This method counts the number of times each menu item appears in orders
+     * within the specified number of days from the current date.
+     *
+     * @param days Number of days to look back from the current date
+     * @return Map with menu item names as keys and their sales quantities as values
+     * @throws RuntimeException if a database error occurs while retrieving data
+     */
+    public static Map<String, Integer> getSalesByItem(int days) {
+        Map<String, Integer> salesByItem = new HashMap<>();
+        String query = 
+            "SELECT m.name AS item_name, COUNT(d.drinkId) AS quantity " +
+            "FROM Drinks d " +
+            "JOIN Menu m ON d.menuId = m.menuId " +
+            "JOIN Orders o ON d.orderId = o.orderId " +
+            "WHERE o.timestamp >= CURRENT_DATE - INTERVAL '" + days + " days' " +
+            "GROUP BY m.name " +
+            "ORDER BY quantity DESC;";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                int quantity = rs.getInt("quantity");
+                salesByItem.put(itemName, quantity);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return salesByItem;
+    }
 }
