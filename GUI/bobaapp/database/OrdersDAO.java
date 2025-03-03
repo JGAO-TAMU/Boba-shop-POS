@@ -2,9 +2,12 @@ package bobaapp.database;
 
 import bobaapp.models.Order;
 import bobaapp.models.OrderItem;
+import bobaapp.models.HourlySales;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class OrdersDAO {
     // Place a new order and return the order ID
@@ -223,6 +226,57 @@ public class OrdersDAO {
         return orders;
     }
 
+    // Get today's orders with employee names
+    public static List<Order> getTodaysOrders() {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(
+                "SELECT o.orderid, o.timestamp, o.price, e.name AS employee_name " +
+                "FROM orders o JOIN employee e ON o.employeeid = e.employeeid " +
+                "WHERE DATE(o.timestamp) = CURRENT_DATE " +
+                "ORDER BY o.timestamp DESC")) {
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int orderId = rs.getInt("orderid");
+                    Timestamp timestamp = rs.getTimestamp("timestamp");
+                    double price = rs.getDouble("price");
+                    String employeeName = rs.getString("employee_name");
+                    
+                    orders.add(new Order(orderId, timestamp, price, employeeName));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting today's orders: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return orders;
+    }
+
+    // Get orders summary for today
+    public static double getTodaysTotalSales() {
+        double totalSales = 0.0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(
+                "SELECT SUM(price) AS total_sales FROM orders " +
+                "WHERE DATE(timestamp) = CURRENT_DATE")) {
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalSales = rs.getDouble("total_sales");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error calculating today's sales: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return totalSales;
+    }
+
     // Update the orders sequence to a specific value
     private static void updateOrderSequence(Connection conn, int newValue) {
         try (Statement stmt = conn.createStatement()) {
@@ -269,5 +323,46 @@ public class OrdersDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Get sales data by hour for today
+    public static List<HourlySales> getTodaySalesByHour() {
+        List<HourlySales> hourlyData = new ArrayList<>();
+        Map<Integer, HourlySales> hourlyMap = new HashMap<>();
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(
+                "SELECT EXTRACT(HOUR FROM timestamp) as hour, " +
+                "COUNT(*) as order_count, SUM(price) as total_sales " +
+                "FROM orders " +
+                "WHERE DATE(timestamp) = CURRENT_DATE " +
+                "GROUP BY EXTRACT(HOUR FROM timestamp) " +
+                "ORDER BY hour")) {
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int hour = rs.getInt("hour");
+                    double totalSales = rs.getDouble("total_sales");
+                    int orderCount = rs.getInt("order_count");
+                    
+                    hourlyMap.put(hour, new HourlySales(hour, totalSales, orderCount));
+                }
+            }
+            
+            // Fill in missing hours with zero sales
+            for (int hour = 0; hour < 24; hour++) {
+                if (hourlyMap.containsKey(hour)) {
+                    hourlyData.add(hourlyMap.get(hour));
+                } else {
+                    hourlyData.add(new HourlySales(hour, 0.0, 0));
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting hourly sales data: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return hourlyData;
     }
 }
