@@ -1,0 +1,6 @@
+bobaapp
+bobaapp.controllers
+bobaapp.database
+bobaapp.models
+bobaapp.utils
+bobaapp.views

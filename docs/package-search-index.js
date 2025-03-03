@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"bobaapp"},{"l":"bobaapp.controllers"},{"l":"bobaapp.database"},{"l":"bobaapp.models"},{"l":"bobaapp.utils"},{"l":"bobaapp.views"}];updateSearchResults();
