@@ -42,8 +42,8 @@ public class OrderItem {
     }
 
     private double calculateTotalPrice() {
-        // Base price + $0.75 per topping
-        return item.getPrice() + (toppings.size() * 0.75);
+        // Base price + $0.50 per topping
+        return item.getPrice() + ((toppings.size() - 2)* 0.50);
     }
 
     public String getDescription() {

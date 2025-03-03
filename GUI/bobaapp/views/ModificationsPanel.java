@@ -141,7 +141,7 @@ public class ModificationsPanel extends JPanel {
         addDrinkLabel.setPreferredSize(new Dimension(120, 60));
         addDrinkLabel.setOpaque(true);
         addDrinkLabel.setBackground(mintButton);
-        addDrinkLabel.setBorder(new RoundedBorder(20));
+        
         rightPanel.add(addDrinkLabel);
         
         // Add components to main panel
@@ -207,7 +207,7 @@ public class ModificationsPanel extends JPanel {
         OrderItem orderItem = new OrderItem(selectedDrink, iceLevel, sugarLevel, modificationNames);
         CurrentOrder.getInstance().addItem(orderItem);
         
-        // Show checkout panel
+        // Show home panel
         CardLayout cl = (CardLayout) getParent().getLayout();
         cl.show(getParent(), "Checkout");
     }
@@ -329,24 +329,5 @@ public class ModificationsPanel extends JPanel {
         }
     }
     
-    // Custom rounded border class
-    private static class RoundedBorder implements Border {
-        private int radius;
-        
-        RoundedBorder(int radius) {
-            this.radius = radius;
-        }
-        
-        public Insets getBorderInsets(Component c) {
-            return new Insets(this.radius+1, this.radius+1, this.radius+2, this.radius);
-        }
-        
-        public boolean isBorderOpaque() {
-            return true;
-        }
-        
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            g.drawRoundRect(x, y, width-1, height-1, radius, radius);
-        }
-    }
+    
 }

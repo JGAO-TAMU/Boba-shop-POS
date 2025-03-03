@@ -55,6 +55,30 @@ public class DbUtil {
             categorizedMods.get(mod.getCategory()).add(mod);
         }
         
+        // Sort the sugar options in the desired order
+        List<Modification> sugarOptions = categorizedMods.get("Sugar");
+        sugarOptions.sort(Comparator.comparingInt(mod -> {
+            switch (mod.getName()) {
+                case "Sugar": return 0;
+                case "75% Sugar": return 1;
+                case "50% Sugar": return 2;
+                case "25% Sugar": return 3;
+                case "0% Sugar": return 4;
+                default: return 5;
+            }
+        }));
+        
+        // Sort the ice options in the desired order
+        List<Modification> iceOptions = categorizedMods.get("Ice");
+        iceOptions.sort(Comparator.comparingInt(mod -> {
+            switch (mod.getName()) {
+                case "Ice": return 0;
+                case "Less Ice": return 1;
+                case "No Ice": return 2;
+                default: return 3;
+            }
+        }));
+        
         return categorizedMods;
     }
 }
