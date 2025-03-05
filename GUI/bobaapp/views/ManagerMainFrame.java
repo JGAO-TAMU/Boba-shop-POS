@@ -4,10 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ManagerMainFrame extends JFrame {
     private JPanel mainPanel;
     private CardLayout cardLayout;
+    private JLabel timeLabel;
 
     public ManagerMainFrame() {
         setTitle("Boba POS System");
@@ -21,7 +24,19 @@ public class ManagerMainFrame extends JFrame {
         topBar.add(new JLabel("Printer"));
         topBar.add(new JLabel("Manager Display"));
         topBar.add(new JLabel("My Devices"));
-        topBar.add(new JLabel("Time: 8:50 am"));
+        // Create time label with current time
+        timeLabel = new JLabel();
+        updateTime(); // Set initial time
+        topBar.add(timeLabel);
+        
+        // Set up a timer to update the time every second
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTime();
+            }
+        });
+        timer.start();
         add(topBar, BorderLayout.NORTH);
 
         // Side Menu
@@ -63,5 +78,11 @@ public class ManagerMainFrame extends JFrame {
         employeesBtn.addActionListener(e -> cardLayout.show(mainPanel, "Employees"));
 
         setVisible(true);
+    }
+    // Method to update the time display
+    private void updateTime() {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm:ss a");
+        String time = timeFormat.format(new Date());
+        timeLabel.setText("Time: " + time);
     }
 }

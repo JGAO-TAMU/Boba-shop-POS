@@ -4,10 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainFrame extends JFrame {
     private JPanel mainPanel;
     private CardLayout cardLayout;
+    private JLabel timeLabel;
 
     public MainFrame() {
         setTitle("Boba POS System");
@@ -21,7 +25,19 @@ public class MainFrame extends JFrame {
         topBar.add(new JLabel("Printer"));
         topBar.add(new JLabel("Customer Display"));
         topBar.add(new JLabel("My Devices"));
-        topBar.add(new JLabel("Time: 8:50 am"));
+        // Create time label with current time
+        timeLabel = new JLabel();
+        updateTime(); // Set initial time
+        topBar.add(timeLabel);
+        
+        // Set up a timer to update the time every second
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTime();
+            }
+        });
+        timer.start();
         add(topBar, BorderLayout.NORTH);
 
         // Side Menu
@@ -30,15 +46,9 @@ public class MainFrame extends JFrame {
         sideMenu.setBackground(new Color(255, 255, 224));
 
         JButton homeBtn = new JButton("Home");
-        // JButton inventoryBtn = new JButton("Inventory");
-        // JButton menuBtn = new JButton("Menu");
-        // JButton orderHistoryBtn = new JButton("Order History");
         JButton checkoutBtn = new JButton("Checkout");
 
         sideMenu.add(homeBtn);
-        // sideMenu.add(inventoryBtn);
-        // sideMenu.add(menuBtn);
-        // sideMenu.add(orderHistoryBtn);
         sideMenu.add(checkoutBtn);
 
         add(sideMenu, BorderLayout.WEST);
@@ -48,9 +58,6 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         mainPanel.add(new HomePanel(), "Home");
-        // mainPanel.add(new InventoryPanel(), "Inventory");
-        // mainPanel.add(new MenuPanel(), "Menu");
-        // mainPanel.add(new OrderHistoryPanel(), "OrderHistory");
         mainPanel.add(new CheckoutPanel(), "Checkout");
         mainPanel.add(new ModificationsPanel(), "Modifications"); // Add the new panel
 
@@ -58,11 +65,14 @@ public class MainFrame extends JFrame {
 
         // Button Actions
         homeBtn.addActionListener(e -> cardLayout.show(mainPanel, "Home"));
-        // inventoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "Inventory"));
-        // menuBtn.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
-        // orderHistoryBtn.addActionListener(e -> cardLayout.show(mainPanel, "OrderHistory"));
         checkoutBtn.addActionListener(e -> cardLayout.show(mainPanel, "Checkout"));
 
         setVisible(true);
+    }
+    // Method to update the time display
+    private void updateTime() {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm:ss a");
+        String time = timeFormat.format(new Date());
+        timeLabel.setText("Time: " + time);
     }
 }
