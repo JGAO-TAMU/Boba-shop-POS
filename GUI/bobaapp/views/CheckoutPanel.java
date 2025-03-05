@@ -69,9 +69,9 @@ public class CheckoutPanel extends JPanel {
             confirmButton.setEnabled(false);
             
             // Reset sequences in a specific order
-            System.out.println("Resetting sequences before placing order...");
-            OrdersDAO.resetOrdersSequence();
-            OrdersDAO.resetDrinksSequence();
+            // System.out.println("Resetting sequences before placing order...");
+            // OrdersDAO.resetOrdersSequence();
+            // OrdersDAO.resetDrinksSequence();
             
             System.out.println("Placing order...");
             // Place the order and get the order ID
