@@ -25,6 +25,8 @@ public class ManagerHomePanel extends JPanel {
     private DefaultTableModel salesTableModel;
     private Color accentColor = new Color(70, 130, 180); // Steel blue
     private Color bgColor = new Color(240, 248, 255); // Alice blue
+    private JPanel productUsageChartPanel;
+    private Map<String, Integer> productUsageData;
 
     public ManagerHomePanel() {
         setLayout(new BorderLayout());
@@ -527,12 +529,14 @@ public class ManagerHomePanel extends JPanel {
 private JPanel createProductUsageChartPanel() {
     JPanel panel = new JPanel(new BorderLayout());
 
-    // panel for product usage chart
-    JPanel productUsageChartPanel = new JPanel() {
+    // Initialize the chart panel with proper paint handling
+    productUsageChartPanel = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            drawProductUsageChart(ReportDAO.getProductUsage(selectedDays)); // Corrected method call
+            if (productUsageData != null) {
+                drawProductUsageChart(g, productUsageData);
+            }
         }
     };
     productUsageChartPanel.setBackground(Color.WHITE);
@@ -569,29 +573,34 @@ private JPanel createProductUsageChartPanel() {
     panel.add(controlPanel, BorderLayout.NORTH);
     panel.add(new JScrollPane(productUsageChartPanel), BorderLayout.CENTER);
 
+    // Initialize the chart with default 30-day data
+    updateProductUsageChart(selectedDays);
+
     return panel;
 }
+
 private void updateProductUsageChart(int days) {
     selectedDays = days;
-    // using swingworker to fix latency issues with querying
-    new SwingWorker<Void, Void>() {
+    new SwingWorker<Map<String, Integer>, Void>() {
         @Override
-        protected Void doInBackground() throws Exception {
-            // fetch data in the background
-            Map<String, Integer> productUsage = ReportDAO.getProductUsage(days);
-            // update chart on Event Dispatch Thread
-            SwingUtilities.invokeLater(() -> {
-                drawProductUsageChart(productUsage);
-                revenueTrendChartPanel.repaint();
-            });
-            return null;
+        protected Map<String, Integer> doInBackground() {
+            return ReportDAO.getProductUsage(days);
+        }
+
+        @Override
+        protected void done() {
+            try {
+                productUsageData = get();
+                productUsageChartPanel.repaint();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }.execute();
 }
 
-private void drawProductUsageChart(Map<String, Integer> productUsage) {
-    Graphics g = revenueTrendChartPanel.getGraphics();
-    if (g == null) return;
+private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage) {
+    if (g == null || productUsage == null) return;
 
     // clear the panel before drawing the new chart
     super.paintComponent(g);
@@ -606,8 +615,8 @@ private void drawProductUsageChart(Map<String, Integer> productUsage) {
 
     int padding = 50;
     int labelPadding = 35; // padding for axis labels
-    int width = revenueTrendChartPanel.getWidth() - 2 * padding;
-    int height = revenueTrendChartPanel.getHeight() - 2 * padding;
+    int width = productUsageChartPanel.getWidth() - 2 * padding;
+    int height = productUsageChartPanel.getHeight() - 2 * padding;
 
     // Find the maximum usage value
     int maxUsage = sortedData.values().stream().mapToInt(Integer::intValue).max().orElse(0);
