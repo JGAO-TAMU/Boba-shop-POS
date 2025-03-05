@@ -88,6 +88,7 @@ public class CheckoutPanel extends JPanel {
                     
                     if (drinkId != -1) {
                         try {
+                            updateInventoryForDrink(item.getMenuItem().getId());
                             // Update inventory for base drink ingredients
                             
                             // Add ice level modification if not default
