@@ -191,8 +191,8 @@ public class ModificationsPanel extends JPanel {
         }
         
         // Find specific ice and sugar selections
-        String iceLevel = "Regular Ice"; // Default
-        String sugarLevel = "100% Sugar"; // Default
+        String iceLevel = "Ice"; // Default
+        String sugarLevel = "Sugar"; // Default
         
         for (Modification mod : selectedModifications) {
             String category = mod.getCategory();

@@ -24,7 +24,7 @@ public class OrderItem {
     private int convertIceLevelToQuantity(String iceLevel) {
         switch(iceLevel) {
             case "Extra Ice": return 5;
-            case "Regular Ice": return 4;
+            case "Ice": return 4;
             case "Light Ice": return 2;
             case "No Ice": return 0;
             default: return 4; // Default to regular ice
@@ -33,9 +33,10 @@ public class OrderItem {
 
     private int convertSugarLevelToQuantity(String sugarLevel) {
         switch(sugarLevel) {
-            case "100% Sugar": return 4;
+            case "Sugar": return 4;
             case "75% Sugar": return 3;
             case "50% Sugar": return 2;
+            case "25% Sugar": return 1;
             case "No Sugar": return 0;
             default: return 4; // Default to 100% sugar
         }
