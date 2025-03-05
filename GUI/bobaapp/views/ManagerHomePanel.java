@@ -51,6 +51,7 @@ public class ManagerHomePanel extends JPanel {
         tabbedPane.addTab("Ingredient Usage", createIngredientUsagePanel());
         tabbedPane.addTab("Revenue Trend Chart", createRevenueTrendChartPanel());
         tabbedPane.addTab("Sales Report", createSalesReportPanel());
+        tabbedPane.addTab("Product Usage Chart", createProductUsageChartPanel());
 
         add(tabbedPane, BorderLayout.CENTER);
 
@@ -515,6 +516,7 @@ public class ManagerHomePanel extends JPanel {
         reportTabbedPane.addTab("Ingredient Usage", createIngredientUsagePanel());
         reportTabbedPane.addTab("Revenue Trend Chart", createRevenueTrendChartPanel());
         reportTabbedPane.addTab("Sales Report", createSalesReportPanel());
+        reportTabbedPane.addTab("ProductUsageChart", createProductUsageChartPanel());
 
         // add the tabbed pane to the frame
         reportFrame.add(reportTabbedPane, BorderLayout.CENTER);
@@ -522,7 +524,151 @@ public class ManagerHomePanel extends JPanel {
         // display the frame
         reportFrame.setVisible(true);
     }
+private JPanel createProductUsageChartPanel() {
+    JPanel panel = new JPanel(new BorderLayout());
 
+    // panel for product usage chart
+    JPanel productUsageChartPanel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            drawProductUsageChart(ReportDAO.getProductUsage(selectedDays)); // Corrected method call
+        }
+    };
+    productUsageChartPanel.setBackground(Color.WHITE);
+
+    JPanel controlPanel = new JPanel();
+    ButtonGroup timeFrameGroup = new ButtonGroup();
+    
+    // time period buttons
+    JRadioButton thirtyDaysButton = new JRadioButton("30 Days");
+    thirtyDaysButton.setSelected(true);
+    thirtyDaysButton.addActionListener(e -> updateProductUsageChart(30));
+
+    JRadioButton sixtyDaysButton = new JRadioButton("60 Days");
+    sixtyDaysButton.addActionListener(e -> updateProductUsageChart(60));
+
+    JRadioButton ninetyDaysButton = new JRadioButton("90 Days");
+    ninetyDaysButton.addActionListener(e -> updateProductUsageChart(90));
+
+    JButton refreshButton = new JButton("Refresh Data");
+    refreshButton.setBackground(accentColor);
+    refreshButton.setForeground(Color.WHITE);
+    refreshButton.setFocusPainted(false);
+    refreshButton.addActionListener(e -> updateProductUsageChart(selectedDays));
+
+    timeFrameGroup.add(thirtyDaysButton);
+    timeFrameGroup.add(sixtyDaysButton);
+    timeFrameGroup.add(ninetyDaysButton);
+
+    controlPanel.add(thirtyDaysButton);
+    controlPanel.add(sixtyDaysButton);
+    controlPanel.add(ninetyDaysButton);
+    controlPanel.add(refreshButton); 
+
+    panel.add(controlPanel, BorderLayout.NORTH);
+    panel.add(new JScrollPane(productUsageChartPanel), BorderLayout.CENTER);
+
+    return panel;
+}
+private void updateProductUsageChart(int days) {
+    selectedDays = days;
+    // using swingworker to fix latency issues with querying
+    new SwingWorker<Void, Void>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+            // fetch data in the background
+            Map<String, Integer> productUsage = ReportDAO.getProductUsage(days);
+            // update chart on Event Dispatch Thread
+            SwingUtilities.invokeLater(() -> {
+                drawProductUsageChart(productUsage);
+                revenueTrendChartPanel.repaint();
+            });
+            return null;
+        }
+    }.execute();
+}
+
+private void drawProductUsageChart(Map<String, Integer> productUsage) {
+    Graphics g = revenueTrendChartPanel.getGraphics();
+    if (g == null) return;
+
+    // clear the panel before drawing the new chart
+    super.paintComponent(g);
+
+    if (productUsage.isEmpty()) {
+        g.drawString("No data available for the selected period", 50, 50);
+        return;
+    }
+
+    // sort data by ingredient name
+    Map<String, Integer> sortedData = new TreeMap<>(productUsage);
+
+    int padding = 50;
+    int labelPadding = 35; // padding for axis labels
+    int width = revenueTrendChartPanel.getWidth() - 2 * padding;
+    int height = revenueTrendChartPanel.getHeight() - 2 * padding;
+
+    // Find the maximum usage value
+    int maxUsage = sortedData.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+    maxUsage = ((maxUsage + 9) / 10) * 10;
+
+    // Draw axes
+    g.setColor(Color.BLACK);
+    g.drawLine(padding, padding, padding, height + padding);
+    g.drawLine(padding, height + padding, width + padding, height + padding);
+
+    // Draw y-axis labels
+    int yLabelCount = 5;
+    for (int i = 0; i <= yLabelCount; i++) {
+        int y = height + padding - i * height / yLabelCount;
+        int value = i * maxUsage / yLabelCount;
+        g.drawString(Integer.toString(value), padding - labelPadding, y + 5); // Shifted y-axis labels to the left
+        g.drawLine(padding - 5, y, padding, y);
+    }
+
+    // draw bars for chart
+    Graphics2D g2d = (Graphics2D) g;
+    String[] ingredients = sortedData.keySet().toArray(new String[0]);
+    int barWidth = width / (ingredients.length > 0 ? ingredients.length : 1);
+
+    for (int i = 0; i < ingredients.length; i++) {
+        String ingredient = ingredients[i];
+        int usage = sortedData.get(ingredient);
+
+        int x = padding + i * barWidth;
+        int barHeight = (int) ((usage / (double) maxUsage) * height);
+        int y = height + padding - barHeight;
+
+        // draw bar with gradient (styling)
+        GradientPaint gradient = new GradientPaint(
+            x, y, new Color(100, 180, 255),
+            x, y + barHeight, new Color(70, 130, 180)
+        );
+        g2d.setPaint(gradient);
+        g2d.fillRect(x, y, barWidth - 2, barHeight);
+
+        // draw border
+        g2d.setColor(new Color(60, 120, 170));
+        g2d.drawRect(x, y, barWidth - 2, barHeight);
+
+        // draw x-axis labels
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 10));
+        String displayName = ingredient.length() > 10 ? ingredient.substring(0, 8) + "..." : ingredient;
+        
+        // rotate text for item names (visibility of inventory item names)
+        AffineTransform oldTransform = g2d.getTransform();
+        g2d.rotate(-Math.PI / 4, x + (barWidth - 2) / 2, height + padding + 25); // shifted x-axis labels down
+        g2d.drawString(displayName, x + (barWidth - 2) / 2 - g2d.getFontMetrics().stringWidth(displayName) / 2, height + padding + 25);
+        g2d.setTransform(oldTransform);
+    }
+
+    // draw chart title
+    g2d.setColor(Color.BLACK);
+    g2d.setFont(new Font("Arial", Font.BOLD, 16));
+    g2d.drawString("Product Usage - Last " + selectedDays + " Days", padding + 50, padding - 10);
+}
     // method to handle logout
     private void logout() {
         // close the current frame
