@@ -169,4 +169,44 @@ public class ReportDAO {
 
         return salesByItem;
     }
+      /**
+     * Retrieves the usage statistics for each ingredient within a specified time frame.
+     * This method calculates the total quantity used for each ingredient across all orders
+     * within the specified number of days from the current date.
+     *
+     * @param days Number of days to look back from the current date
+     * @return Map with ingredient names as keys and their total usage quantities as values
+     * @throws RuntimeException if a database error occurs while retrieving data
+     */
+public static Map<String, Integer> getProductUsage(int days) {
+    Map<String, Integer> productUsage = new HashMap<>();
+    String query = 
+        "SELECT i.name AS ingredient, SUM(di.quantityUsed) AS total_usage " +
+        "FROM DrinkIngredients di " +
+        "JOIN Inventory i ON di.ingredientID = i.ingredientID " +
+        "JOIN Menu m ON di.menuID = m.menuID " +  
+        "JOIN Drinks d ON m.menuID = d.menuID " +  
+        "JOIN Orders o ON d.orderID = o.orderID " +
+        "WHERE o.timestamp >= CURRENT_DATE - (? * INTERVAL '1 day') " + // Fixed INTERVAL
+        "GROUP BY i.name " +
+        "ORDER BY total_usage DESC;";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+        pstmt.setInt(1, days);
+        ResultSet rs = pstmt.executeQuery();
+
+        while (rs.next()) {
+            String ingredient = rs.getString("ingredient");
+            int totalUsage = rs.getInt("total_usage");
+
+            productUsage.put(ingredient, totalUsage);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return productUsage;
+}
 }

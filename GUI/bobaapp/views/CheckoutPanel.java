@@ -69,9 +69,9 @@ public class CheckoutPanel extends JPanel {
             confirmButton.setEnabled(false);
             
             // Reset sequences in a specific order
-            System.out.println("Resetting sequences before placing order...");
-            OrdersDAO.resetOrdersSequence();
-            OrdersDAO.resetDrinksSequence();
+            // System.out.println("Resetting sequences before placing order...");
+            // OrdersDAO.resetOrdersSequence();
+            // OrdersDAO.resetDrinksSequence();
             
             System.out.println("Placing order...");
             // Place the order and get the order ID
@@ -88,34 +88,34 @@ public class CheckoutPanel extends JPanel {
                     
                     if (drinkId != -1) {
                         try {
-                            // Update inventory for base drink ingredients
                             updateInventoryForDrink(item.getMenuItem().getId());
+                            // Update inventory for base drink ingredients
                             
                             // Add ice level modification if not default
-                            if (item.getIceQuantity() != 4) { // 4 is regular ice
-                                int iceMod = getModIdForIceLevel(item.getIceQuantity());
-                                if (iceMod != -1) {
-                                    OrdersDAO.addModification(drinkId, iceMod);
-                                    updateInventoryForModification(iceMod);
-                                }
-                            } else {
-                                // Even if using default ice, we need to update inventory for regular ice
-                                int regularIceMod = getModIdForIceLevel(4);
-                                updateInventoryForModification(regularIceMod);
-                            }
+                            // if (item.getIceQuantity() != 4) { // 4 is regular ice
+                            //     int iceMod = getModIdForIceLevel(item.getIceQuantity());
+                            //     if (iceMod != -1) {
+                            //         OrdersDAO.addModification(drinkId, iceMod);
+                            //         updateInventoryForModification(iceMod);
+                            //     }
+                            // } else {
+                            //     // Even if using default ice, we need to update inventory for regular ice
+                            //     int regularIceMod = getModIdForIceLevel(4);
+                            //     updateInventoryForModification(regularIceMod);
+                            // }
                             
-                            // Add sugar level modification if not default
-                            if (item.getSugarQuantity() != 4) { // 4 is 100% sugar
-                                int sugarMod = getModIdForSugarLevel(item.getSugarQuantity());
-                                if (sugarMod != -1) {
-                                    OrdersDAO.addModification(drinkId, sugarMod);
-                                    updateInventoryForModification(sugarMod);
-                                }
-                            } else {
-                                // Even if using default sugar, we need to update inventory for 100% sugar
-                                int regularSugarMod = getModIdForSugarLevel(4);
-                                updateInventoryForModification(regularSugarMod);
-                            }
+                            // // Add sugar level modification if not default
+                            // if (item.getSugarQuantity() != 4) { // 4 is 100% sugar
+                            //     int sugarMod = getModIdForSugarLevel(item.getSugarQuantity());
+                            //     if (sugarMod != -1) {
+                            //         OrdersDAO.addModification(drinkId, sugarMod);
+                            //         updateInventoryForModification(sugarMod);
+                            //     }
+                            // } else {
+                            //     // Even if using default sugar, we need to update inventory for 100% sugar
+                            //     int regularSugarMod = getModIdForSugarLevel(4);
+                            //     updateInventoryForModification(regularSugarMod);
+                            // }
                             
                             // Add topping modifications
                             for (String topping : item.getToppings()) {
@@ -212,7 +212,7 @@ public class CheckoutPanel extends JPanel {
     private int getModIdForIceLevel(int iceQuantity) {
         switch (iceQuantity) {
             case 0: return getModIdByName("No Ice");
-            case 2: return getModIdByName("Light Ice");
+            case 2: return getModIdByName("Less Ice");
             case 4: return getModIdByName("Ice");
             case 5: return getModIdByName("Extra Ice");
             default: return -1;
@@ -222,7 +222,8 @@ public class CheckoutPanel extends JPanel {
     // Map sugar level quantities to modification IDs
     private int getModIdForSugarLevel(int sugarQuantity) {
         switch (sugarQuantity) {
-            case 0: return getModIdByName("No Sugar");
+            case 0: return getModIdByName("0% Sugar");
+            case 1: return getModIdByName("25% Sugar");
             case 2: return getModIdByName("50% Sugar");
             case 3: return getModIdByName("75% Sugar");
             case 4: return getModIdByName("Sugar");
