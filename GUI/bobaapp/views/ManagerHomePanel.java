@@ -620,24 +620,39 @@ private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage
 
     // Find the maximum usage value
     int maxUsage = sortedData.values().stream().mapToInt(Integer::intValue).max().orElse(0);
-    maxUsage = ((maxUsage + 9) / 10) * 10;
+    
+    // Calculate appropriate scale for y-axis
+    int scale = 1;
+    if (maxUsage >= 1000) {
+        scale = 1000;
+    } else if (maxUsage >= 100) {
+        scale = 100;
+    } else {
+        scale = 10;
+    }
+    
+    // Round up maxUsage to next multiple of scale
+    maxUsage = (int) Math.ceil(maxUsage / (double) scale) * scale;
 
     // Draw axes
     g.setColor(Color.BLACK);
     g.drawLine(padding, padding, padding, height + padding);
     g.drawLine(padding, height + padding, width + padding, height + padding);
 
-    // Draw y-axis labels
-    int yLabelCount = 5;
+    // Draw y-axis labels (modified section)
+    int yLabelCount = 5; // Fixed number of labels
+    Graphics2D g2d = (Graphics2D) g;
+    g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+    
     for (int i = 0; i <= yLabelCount; i++) {
-        int y = height + padding - i * height / yLabelCount;
-        int value = i * maxUsage / yLabelCount;
-        g.drawString(Integer.toString(value), padding - labelPadding, y + 5); // Shifted y-axis labels to the left
-        g.drawLine(padding - 5, y, padding, y);
+        int y = height + padding - (i * height / yLabelCount);
+        int value = (i * maxUsage / yLabelCount);
+        String label = String.valueOf(value);
+        g2d.drawString(label, padding - labelPadding, y + 5);
+        g2d.drawLine(padding - 5, y, padding, y);
     }
 
-    // draw bars for chart
-    Graphics2D g2d = (Graphics2D) g;
+    // draw bars
     String[] ingredients = sortedData.keySet().toArray(new String[0]);
     int barWidth = width / (ingredients.length > 0 ? ingredients.length : 1);
 
@@ -646,6 +661,7 @@ private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage
         int usage = sortedData.get(ingredient);
 
         int x = padding + i * barWidth;
+        // Calculate bar height based on the actual maximum value
         int barHeight = (int) ((usage / (double) maxUsage) * height);
         int y = height + padding - barHeight;
 
@@ -660,6 +676,13 @@ private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage
         // draw border
         g2d.setColor(new Color(60, 120, 170));
         g2d.drawRect(x, y, barWidth - 2, barHeight);
+
+        // draw usage value above bar
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 11));
+        String usageText = String.valueOf(usage);
+        int textWidth = g2d.getFontMetrics().stringWidth(usageText);
+        g2d.drawString(usageText, x + (barWidth - 2) / 2 - textWidth / 2, y - 5);
 
         // draw x-axis labels
         g2d.setColor(Color.BLACK);
@@ -676,7 +699,7 @@ private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage
     // draw chart title
     g2d.setColor(Color.BLACK);
     g2d.setFont(new Font("Arial", Font.BOLD, 16));
-    g2d.drawString("Product Usage - Last " + selectedDays + " Days", padding + 50, padding - 10);
+    g2d.drawString("Product Usage - Last " + selectedDays + " Days", padding + 50, padding - 15);
 }
     // method to handle logout
     private void logout() {
