@@ -1,51 +1,71 @@
--- for boba pearls (modificationsmenu.modmenuid = 1)
+-- Mapping of modification menu items to their ingredients with quantities
+
+-- TOPPINGS
+
+-- for Boba Pearls (modMenuID = 1)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (1, 19, 1);
 
--- for pudding (modmenuid = 2)
+-- for Pudding (modMenuID = 2)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (2, 17, 1);
 
--- for grass jelly (modmenuid = 3)
+-- for Grass Jelly (modMenuID = 3)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (3, 18, 1);
 
--- for lychee jelly (modmenuid = 4)
+-- for Lychee Jelly (modMenuID = 4)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (4, 13, 1);
 
--- for mango bits (modmenuid = 5)
+-- for Mango Bits (modMenuID = 5)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (5, 14, 1);
 
--- for strawberry bits (modmenuid = 6)
+-- for Strawberry Bits (modMenuID = 6)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
 VALUES (6, 15, 1);
 
--- for ice (modmenuid = 7)
+-- for Peach Bits (modMenuID = 7)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
-VALUES (7, 20, 1);
+VALUES (7, 16, 1);
 
--- for peach bits (modmenuid = 9)
-INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed) 
-VALUES (8, 16, 1);
+-- SUGAR LEVELS
 
--- for normal sugar (modmenuid = 10)
+-- for Sugar - 100% (modMenuID = 8)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
-VALUES (9, 21, 4);
+VALUES (8, 21, 4);
 
--- for 75% sugar (modmenuid = 11)
+-- for 75% Sugar (modMenuID = 9)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
-VALUES (10, 21, 3);
+VALUES (9, 21, 3);
 
--- for 50% sugar (modmenuid = 11)
+-- for 50% Sugar (modMenuID = 10)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
-VALUES (11, 21, 2);
+VALUES (10, 21, 2);
 
--- for extra ice (modmenuid = 12)
+-- for 25% Sugar (modMenuID = 11)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
-VALUES (12, 20, 1);
+VALUES (11, 21, 1);
 
--- for less ice (modmenuid = 13)
+-- for 0% Sugar (modMenuID = 12)
 INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
-VALUES (13, 20, 1);
+VALUES (12, 21, 0);
+
+-- ICE LEVELS
+
+-- for Ice - Normal (modMenuID = 13)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (13, 20, 4);
+
+-- for Extra Ice (modMenuID = 14)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (14, 20, 6);
+
+-- for Less Ice (modMenuID = 15)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (15, 20, 2);
+
+-- for No Ice (modMenuID = 16)
+INSERT INTO ModIngredients (modMenuID, ingredientID, quantityUsed)
+VALUES (16, 20, 0);

@@ -5,10 +5,13 @@ INSERT INTO ModificationsMenu (name, price) VALUES
 ('Lychee Jelly', 0.50),
 ('Mango Bits', 0.50),
 ('Strawberry Bits', 0.50),
-('Ice', 0.00),
 ('Peach Bits', 0.50),
 ('Sugar', 0.00),
 ('75% Sugar', 0.00),
 ('50% Sugar', 0.00),
-('Extra Ice', 0.00),
-('Less Ice', 0.00);
+('25% Sugar', 0.00),
+('0% Sugar', 0.00),
+('Ice', 0.00),
+('Less Ice', 0.00),
+('No Ice', 0.00),
+('Extra Ice', 0.00);

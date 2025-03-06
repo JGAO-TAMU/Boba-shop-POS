@@ -1,5 +1,6 @@
 package bobaapp.views;
 
+import javax.naming.directory.ModificationItem;
 import javax.swing.*;
 import java.awt.*;
 import bobaapp.models.CurrentOrder;
@@ -8,6 +9,8 @@ import bobaapp.database.OrdersDAO;
 import bobaapp.database.InventoryDAO;
 import bobaapp.database.DrinkIngredientsDAO;
 import bobaapp.database.ModIngredientsDAO;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CheckoutPanel extends JPanel {
     private JTextArea checkoutTextArea;
@@ -64,121 +67,82 @@ public class CheckoutPanel extends JPanel {
     private void confirmOrder() {
         CurrentOrder currentOrder = CurrentOrder.getInstance();
         
+        // Immediately disable button to prevent double submission
+        confirmButton.setEnabled(false);
+        
         try {
-            // Temporarily disable the confirm button to prevent multiple orders
-            confirmButton.setEnabled(false);
-            
-            // Reset sequences in a specific order
-            // System.out.println("Resetting sequences before placing order...");
-            // OrdersDAO.resetOrdersSequence();
-            // OrdersDAO.resetDrinksSequence();
-            
             System.out.println("Placing order...");
-            // Place the order and get the order ID
             int orderId = OrdersDAO.placeOrder(1, currentOrder.getTotal());
-            System.out.println("Order placed with ID: " + orderId);
             
+            // Only process if we got a valid order ID
             if (orderId != -1) {
-                // Add each drink and its modifications
-                boolean allItemsProcessed = true;
+                // Make a copy of the items to prevent concurrent modification
+                List<OrderItem> itemsCopy = new ArrayList<>(currentOrder.getItems());
                 
-                for (OrderItem item : currentOrder.getItems()) {
-                    // Add the drink and get its ID
-                    int drinkId = OrdersDAO.addDrink(orderId, item.getMenuItem().getId());
+                // Process order items...
+                for (OrderItem item : itemsCopy) {
+                    // Get the menu item ID and update inventory
+                    int menuId = item.getMenuItem().getId();
+                    int drinkId = OrdersDAO.addDrink(orderId, menuId);
                     
-                    if (drinkId != -1) {
-                        try {
-                            updateInventoryForDrink(item.getMenuItem().getId());
-                            // Update inventory for base drink ingredients
-                            
-                            // Add ice level modification if not default
-                            // if (item.getIceQuantity() != 4) { // 4 is regular ice
-                            //     int iceMod = getModIdForIceLevel(item.getIceQuantity());
-                            //     if (iceMod != -1) {
-                            //         OrdersDAO.addModification(drinkId, iceMod);
-                            //         updateInventoryForModification(iceMod);
-                            //     }
-                            // } else {
-                            //     // Even if using default ice, we need to update inventory for regular ice
-                            //     int regularIceMod = getModIdForIceLevel(4);
-                            //     updateInventoryForModification(regularIceMod);
-                            // }
-                            
-                            // // Add sugar level modification if not default
-                            // if (item.getSugarQuantity() != 4) { // 4 is 100% sugar
-                            //     int sugarMod = getModIdForSugarLevel(item.getSugarQuantity());
-                            //     if (sugarMod != -1) {
-                            //         OrdersDAO.addModification(drinkId, sugarMod);
-                            //         updateInventoryForModification(sugarMod);
-                            //     }
-                            // } else {
-                            //     // Even if using default sugar, we need to update inventory for 100% sugar
-                            //     int regularSugarMod = getModIdForSugarLevel(4);
-                            //     updateInventoryForModification(regularSugarMod);
-                            // }
-                            
-                            // Add topping modifications
-                            for (String topping : item.getToppings()) {
-                                int toppingId = getToppingModId(topping);
-                                if (toppingId != -1) {
-                                    OrdersDAO.addModification(drinkId, toppingId);
-                                    updateInventoryForModification(toppingId);
+                    // Update inventory for the base drink
+                    updateInventoryForDrink(menuId);
+                    
+                    // Process modifications for this drink (ice, sugar, toppings, etc.)
+                    // Process toppings
+                    if (item.getToppings() != null && !item.getToppings().isEmpty()) {
+                        for (String topping : item.getToppings()) {
+                            int toppingModId = getToppingModId(topping);
+                            if (toppingModId > 0) {
+                                try {
+                                    OrdersDAO.addModification(drinkId, toppingModId);
+                                    updateInventoryForModification(toppingModId);
+                                    System.out.println("Added topping modification: " + topping + " (ID: " + toppingModId + ")");
+                                } catch (Exception e) {
+                                    System.err.println("Error adding topping modification: " + e.getMessage());
+                                    // Continue processing other toppings
                                 }
                             }
-                        } catch (Exception ex) {
-                            System.err.println("Error updating inventory for drink " + 
-                                item.getMenuItem().getName() + ": " + ex.getMessage());
-                            ex.printStackTrace();
-                            allItemsProcessed = false;
                         }
-                    } else {
-                        allItemsProcessed = false;
-                        System.err.println("Failed to add drink to order: " + item.getMenuItem().getName());
                     }
                 }
+                    
+                // Only show message and clear order AFTER processing all items
+                JOptionPane.showMessageDialog(this,
+                    "Order placed successfully!",
+                    "Order Confirmation", 
+                    JOptionPane.INFORMATION_MESSAGE);
                 
-                // Clear the current order and update display
+                // Clear the order AFTER processing all items
                 currentOrder.clear();
+                System.out.println("Cleared current order");
                 updateDisplay();
                 
-                // Update OrderHistoryPanel
+                // Update panels if needed
                 if (orderHistoryPanel != null) {
                     orderHistoryPanel.refreshOrderHistory();
                 }
-                
-                // Update InventoryPanel with latest inventory data
                 if (inventoryPanel != null) {
-                    System.out.println("Refreshing inventory panel...");
                     inventoryPanel.refreshInventoryTable();
-                } else {
-                    System.err.println("ERROR: inventoryPanel is null, cannot refresh!");
                 }
-                
-                if (allItemsProcessed) {
-                    JOptionPane.showMessageDialog(this, "Order #" + orderId + " placed successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(this, 
-                        "Order #" + orderId + " placed, but some items may not have been processed correctly. " +
-                        "Check console for details.",
-                        "Partial Success",
-                        JOptionPane.WARNING_MESSAGE);
-                }
+                confirmButton.setEnabled(true);
             } else {
                 JOptionPane.showMessageDialog(this, 
                     "Failed to place order. Please try again.", 
                     "Order Error", 
                     JOptionPane.ERROR_MESSAGE);
+                // Re-enable button on failure
+                confirmButton.setEnabled(true);
             }
-            
-            confirmButton.setEnabled(true);
         } catch (Exception ex) {
-            confirmButton.setEnabled(true);
             System.err.println("Error in confirmOrder: " + ex.getMessage());
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, 
                 "Error processing order: " + ex.getMessage(), 
                 "Order Error", 
                 JOptionPane.ERROR_MESSAGE);
+            // Re-enable button on exception
+            confirmButton.setEnabled(true);
         }
     }
     

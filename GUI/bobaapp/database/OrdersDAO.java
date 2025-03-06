@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
 
 public class OrdersDAO {
     // Place a new order and return the order ID
@@ -15,32 +16,61 @@ public class OrdersDAO {
         int orderId = -1;
         
         try (Connection conn = DatabaseConnection.getConnection()) {
+            // Set both network and query timeouts
+            conn.setNetworkTimeout(Executors.newSingleThreadExecutor(), 10000); // 10 seconds timeout
+            
             conn.setAutoCommit(false); // Start transaction
-            System.out.println("connected to db and started transaction");
+            
             try {
-                // Use the sequence directly - simpler and avoids locking
-                try (PreparedStatement pstmt = conn.prepareStatement(
-                    "INSERT INTO orders (timestamp, price, employeeid) VALUES (NOW(), ?, ?) RETURNING orderid")) {
-                    
-                    pstmt.setDouble(1, price);
-                    pstmt.setInt(2, employeeId);
-                    System.out.println("attempting to execute query");
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        System.out.println("executed query");
+                // Lock the orders table for a short period to avoid race conditions
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.setQueryTimeout(5); // 5 second query timeout
+                    // Use advisory lock instead of table lock - MUCH better for concurrency
+                    stmt.execute("SELECT pg_advisory_xact_lock(42)");
+                }
+                
+                // Fix the sequence first to avoid duplicate keys
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.setQueryTimeout(5); // 5 second query timeout
+                    try (ResultSet rs = stmt.executeQuery("SELECT COALESCE(MAX(orderid), 0) + 1 FROM orders")) {
                         if (rs.next()) {
-                            orderId = rs.getInt(1);
-                            System.out.println("Order placed with ID: " + orderId);
+                            int nextId = rs.getInt(1);
+                            updateOrderSequence(conn, nextId);
                         }
                     }
                 }
                 
+                // Now it's safe to insert
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO orders (timestamp, price, employeeid) VALUES (NOW(), ?, ?) RETURNING orderid")) {
+                    
+                    pstmt.setQueryTimeout(5); // 5 second query timeout
+                    pstmt.setDouble(1, price);
+                    pstmt.setInt(2, employeeId);
+                    System.out.println("executing query...");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        System.out.println("executed query");
+                        if (rs.next()) {
+                            orderId = rs.getInt(1);
+                            System.out.println("Order ID retrieved: " + orderId);
+                        }
+                    }
+                }
+                
+                System.out.println("Attempting to commit...");
                 conn.commit();
+                System.out.println("Commit successful");
             } catch (SQLException ex) {
-                System.err.println("Error in transaction, rolling back: " + ex.getMessage());
+                System.err.println("SQLException, rolling back: " + ex.getMessage());
                 conn.rollback();
                 throw ex;
             } finally {
-                conn.setAutoCommit(true); // Reset auto-commit
+                try {
+                    conn.setAutoCommit(true);
+                    System.out.println("Auto-commit reset to true");
+                } catch (SQLException e) {
+                    System.err.println("Error resetting auto-commit: " + e.getMessage());
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error in placeOrder: " + e.getMessage());
