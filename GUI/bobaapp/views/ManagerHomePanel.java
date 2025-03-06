@@ -113,15 +113,22 @@ public class ManagerHomePanel extends JPanel {
 
     private JPanel createIngredientUsagePanel() {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(bgColor);
 
-        JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);
+        // Create table model
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Ingredient", "Quantity Used"}, 0);
+        JTable table = new JTable(tableModel);
+
+        // Populate table model
         Map<String, Integer> ingredientUsage = ReportDAO.getIngredientUsage();
         for (String ingredient : ingredientUsage.keySet()) {
-            textArea.append(ingredient + ": " + ingredientUsage.get(ingredient) + "\n");
+            tableModel.addRow(new Object[]{ingredient, ingredientUsage.get(ingredient)});
         }
 
-        panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        // Add table to scroll pane
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createLineBorder(accentColor, 2));
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }
