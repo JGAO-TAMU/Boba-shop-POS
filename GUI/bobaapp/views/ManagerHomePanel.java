@@ -213,6 +213,19 @@ public class ManagerHomePanel extends JPanel {
             g.drawLine(padding - 5, y, padding, y);
         }
         
+        // draw y-axis label
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
+        
+        // draw y-axis label rotated 90 degrees
+        Graphics2D g2d = (Graphics2D) g;
+        AffineTransform originalTransform = g2d.getTransform();
+        g2d.rotate(-Math.PI / 2);
+        g2d.drawString("Daily Revenue ($)", -height / 2 - padding, padding - labelPadding - 10);
+        g2d.setTransform(originalTransform);
+        
+        // draw x-axis label
+        g.drawString("Date", width / 2 + padding, height + padding + 40);
+        
         // draw data points and lines
         g.setColor(Color.BLUE);
         
@@ -433,6 +446,16 @@ public class ManagerHomePanel extends JPanel {
         g2d.setColor(Color.BLACK);
         g2d.drawLine(padding + labelWidth, padding, padding + labelWidth, padding + height);
         g2d.drawLine(padding + labelWidth, padding + height, padding + labelWidth + width, padding + height);
+        
+        // Add y-axis label
+        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        AffineTransform originalTransform = g2d.getTransform();
+        g2d.rotate(-Math.PI / 2);
+        g2d.drawString("Quantity Sold", -height / 2 - padding - 20, padding + 70);
+        g2d.setTransform(originalTransform);
+        
+        // Add x-axis label
+        g2d.drawString("Boba Drink Flavor", padding + labelWidth + width / 2 - 10, padding + height + 20);
         
         // Determine the maximum value for scaling
         int maxValue = 0;
@@ -707,6 +730,16 @@ private void drawProductUsageChart(Graphics g, Map<String, Integer> productUsage
     g2d.setColor(Color.BLACK);
     g2d.setFont(new Font("Arial", Font.BOLD, 16));
     g2d.drawString("Product Usage - Last " + selectedDays + " Days", padding + 50, padding - 15);
+
+    // draw y-axis label rotated 90 degrees
+    g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+    AffineTransform originalTransform = g2d.getTransform();
+    g2d.rotate(-Math.PI / 2);
+    g2d.drawString("Quantity Used", -height / 2 - padding - 20, padding - 40);
+    g2d.setTransform(originalTransform);
+
+    // draw x-axis label further downward
+    g2d.drawString("Ingredient", width / 2 + padding - 30, height + padding + 50);
 }
     // method to handle logout
     private void logout() {
