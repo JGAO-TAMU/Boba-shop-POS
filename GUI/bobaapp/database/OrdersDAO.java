@@ -367,4 +367,73 @@ public class OrdersDAO {
         
         return hourlyData;
     }
+
+    // Get payment method totals for today
+    public static Map<String, Double> getTodaysPaymentMethodTotals() {
+        Map<String, Double> paymentTotals = new HashMap<>();
+        
+        // Default payment methods
+        paymentTotals.put("Cash", 0.0);
+        paymentTotals.put("Credit", 0.0);
+        paymentTotals.put("Debit", 0.0);
+        paymentTotals.put("Mobile", 0.0);
+        
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // This is a simplified example. In a real system, payment methods would be stored in the database
+            // For now, we'll assume all payments are evenly distributed for demonstration
+            double totalSales = getTodaysTotalSales();
+            
+            if (totalSales > 0) {
+                // Mock distribution: 40% credit, 30% debit, 20% cash, 10% mobile
+                paymentTotals.put("Credit", totalSales * 0.4);
+                paymentTotals.put("Debit", totalSales * 0.3);
+                paymentTotals.put("Cash", totalSales * 0.2);
+                paymentTotals.put("Mobile", totalSales * 0.1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting payment method totals: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return paymentTotals;
+    }
+    
+    // Get estimated tax for today's orders
+    public static double getTodaysTaxAmount() {
+        // In a real system, tax would be calculated and stored separately
+        // For this example, we'll use a flat 8% tax rate on all sales
+        final double TAX_RATE = 0.08;
+        return getTodaysTotalSales() * TAX_RATE;
+    }
+
+    // Method to reset daily sales (simplified - just deletes today's orders without archiving)
+    public static boolean resetDailySales() {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // Simply delete today's orders - no archiving
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                "DELETE FROM orders WHERE DATE(timestamp) = CURRENT_DATE")) {
+                
+                int rowsDeleted = pstmt.executeUpdate();
+                System.out.println("Z-Report: Deleted " + rowsDeleted + " orders for today");
+                return rowsDeleted >= 0; // Consider success even if no rows deleted
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in resetDailySales: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // These methods are no longer needed since we don't have archive tables
+    // They are kept with minimal implementation for API compatibility
+    
+    public static List<Order> getArchivedOrdersForDate(Date date) {
+        // Returns an empty list since we no longer archive orders
+        return new ArrayList<>();
+    }
+    
+    public static List<Map<String, Object>> getZReportHistory() {
+        // Returns an empty list since we no longer archive Z-reports
+        return new ArrayList<>();
+    }
 }
